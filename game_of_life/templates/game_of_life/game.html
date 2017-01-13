@@ -1,0 +1,21 @@
+{% load static %}
+
+
+
+<script
+src="https://code.jquery.com/jquery-2.2.4.min.js"
+integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+crossorigin="anonymous"></script>
+
+<link rel="stylesheet" href="{% static 'game_of_life/style.css' %}" />
+<script src="{% static 'game_of_life/script.js' %}" ></script>
+
+<h1>John Conway's Game of Life</h1>
+
+
+<section>
+	<canvas id="board"></canvas>
+</section>
+
+<button id="button-step">Step</button>
+
