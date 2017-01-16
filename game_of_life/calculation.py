@@ -100,7 +100,7 @@ def start(board=None):
 	global myBoard
 
 	if board is None:
-		board = Board(30, 30)
+		board = Board(45, 45)
 		# Randomize board
 		myBoard = board
 		board.give_life()

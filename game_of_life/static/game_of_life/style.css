@@ -1,8 +1,79 @@
+
+/*
+
+Fresh Air: #B0D7FF
+Glitter: #EAE8FF
+Gunmetal: #2D3142
+Silver Chalise: #ADACB5
+Gainsboro: #D8D5DB
+
+
+*/
+
+
+
+
+h1, h2 h3, h4, h5, h6, p {
+
+    font-family: 'Roboto-Thin'
+}
+
 body {
+
+}
+
+
+.pop-graph {
+    border: 1px solid black;
+    width: 100%;
+    height: 300px;
 }
 
 #board {
-	//width: 500px;
-	//height: 500px;
-	//border: 5px solid green;
+
+    //box-shadow: 5px 5px 10px #999;
+    background-color: white;
+    width: 100%;
+    height: 400px;
+
 }
+
+#section-intro {
+    height: 100vh;
+    background-color: #2D3142;
+    color: white;
+
+}
+
+#section-intro .jumbotron {
+    background-color: transparent;
+}
+
+
+#section-simulation {
+    padding: 70px 0px;
+    background-color: #E2F0FF;
+    background-color: #2F6690;
+    color: white;
+}
+
+#section-simulation .row-console {
+    padding: 30px 0px;
+}
+
+#section-simulation .row-console {
+    padding: 30px 0px;
+}
+
+
+#section-simulation figure {
+    display: inline-block;
+    text-align: center;
+}
+
+#section-rules {
+    padding: 100px 0px;
+}
+
+
+

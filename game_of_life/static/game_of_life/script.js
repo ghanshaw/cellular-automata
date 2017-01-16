@@ -1,3 +1,37 @@
+
+
+
+
+
+   $(document).ready(function() {
+
+
+     var slideout = new Slideout({
+    'panel': document.getElementById('panel'),
+    'menu': document.getElementById('menu'),
+    'padding': 256,
+    'tolerance': 70
+
+
+  });
+
+        // Toggle button
+      document.querySelector('.toggle-button').addEventListener('click', function() {
+        slideout.toggle();
+        $(this).toggleClass('is-active');
+      });
+
+
+   });
+
+
+
+
+
+
+
+
+
 // Test import
 console.log("Hunter X Hunter!");
 
@@ -55,16 +89,31 @@ function draw() {
 
     var canvas = document.getElementById("board");
     var ctx = canvas.getContext("2d");
-    ctx.canvas.width = 500;
-    ctx.canvas.height = 500;
+    ctx.canvas.width = $(canvas).width();;
+    ctx.canvas.height = $(canvas).height();;
     ctx.beginPath();
 
-    var width_ctx = 500;
-    var height_ctx = 500;
+    var width_ctx = $(canvas).width();
+    var height_ctx = $(canvas).height();
     var width_tiles = json_data.length;
     var width_cell = width_ctx/width_tiles;
     var height_tiles = json_data[0].length;
 
+    var min_cell_width = 5;
+
+    ctx.fillStyle = "#B0D7FF";
+
+    // Infra red
+    ctx.fillStyle = "#ef476f";
+
+    // Orange-Yellow
+    ctx.fillStyle = "#FFD166";
+
+    // Carribean Green
+    ctx.fillStyle = "#06D6A0";
+
+    // Slategrey
+    ctx.fillStyle = "slategrey";
 
 
     for (var i = 0; i < json_data.length; i++) {
@@ -73,10 +122,14 @@ function draw() {
             if (json_data[j][i]) {
                 ctx.fillRect(width_cell * i, width_cell * j, width_cell, width_cell)
 
+                /*ctx.beginPath();
+                var radius = width_cell / 2;
+                ctx.arc(width_cell * i + radius, width_cell * j + radius, radius, 0, 2 * Math.PI, false);
+                ctx.fill();
 
-                ctx.lineWidth = 6;
+                ctx.lineWidth = 0;
                 ctx.strokeStyle = 'white';
-                ctx.strokeRect(width_cell * i, width_cell * j, width_cell, width_cell)
+                ctx.strokeRect(width_cell * i, width_cell * j, width_cell, width_cell)*/
             }
 
         }
@@ -85,8 +138,9 @@ function draw() {
 
 
     for (var i = 0; i <= width_tiles; i++) {
-        ctx.strokeStyle = '#aaa';
-        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#ADACB5';
+        ctx.strokeStyle = '#ddd';
+        ctx.lineWidth = .5;
         var draw_x = width_cell * i
         ctx.moveTo(draw_x, 0);
         ctx.lineTo(width_cell * i, height_ctx);

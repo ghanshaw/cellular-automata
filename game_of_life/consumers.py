@@ -26,7 +26,7 @@ def ws_receive(message):
 		#if message_dict['start']:
 		#board = calculation.start()
 
-		exploder = calculation.Board(30, 30)
+		exploder = calculation.Board(45, 45)
 		exploder.board[10][10] = 1
 		exploder.board[11][9] = 1
 		exploder.board[11][10] = 1
