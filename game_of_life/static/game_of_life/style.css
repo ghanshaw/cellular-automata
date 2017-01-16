@@ -9,25 +9,36 @@ Gainsboro: #D8D5DB
 
 
 */
+{% load static %}
 
 
-
+/*
+-----------------------------
+General
+-----------------------------
+*/
 
 h1, h2 h3, h4, h5, h6, p {
 
-    font-family: 'Roboto-Thin'
+    font-family: 'Roboto-light';
+    line-height: 1.6;
 }
 
 body {
 
 }
 
-
-.pop-graph {
-    border: 1px solid black;
-    width: 100%;
-    height: 300px;
+.section-title {
+    margin-bottom: 40px;
+    font-weight: 300;
 }
+
+
+:focus {
+    outline: none;
+}
+
+
 
 #board {
 
@@ -35,18 +46,122 @@ body {
     background-color: white;
     width: 100%;
     height: 400px;
-
+    box-shadow: 5px 5px 20px grey;
+    border-radius: 10px;
 }
 
-#section-intro {
-    height: 100vh;
+
+.hamburger {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: white;
+}
+
+
+
+.hamburger-inner, .hamburger-inner:after, .hamburger-inner:before  {
+    background-color: white;
+    width: 30px;
+    height: 2px;
+}
+
+
+/*
+-----------------------------
+Section - Header
+-----------------------------
+*/
+
+
+#section-header {
+    height: 160px;
     background-color: #2D3142;
     color: white;
+    position: relative;
+    //background: url('static/game_of_life/images/grey_background.jpg');
+}
+
+#section-header .jumbotron {
+    margin-top: 50px;
+    background-color: transparent;
+}
+
+#section-header .page-title-wrapper {
+    position: initial;
+}
+
+#section-header .page-title {
+    text-transform: uppercase;
+    font-weight: 900;
+    bottom: -40px;
+    position: absolute;
+    font-size: 63px;
+}
+
+
+/*
+-----------------------------
+Section - Rules
+-----------------------------
+*/
+
+
+#section-rules {
+    padding: 100px 0px;
+}
+
+
+#section-rules h4 {
+    margin-bottom: 30px;
+}
+
+
+#section-rules .rules-list li {
+    margin-top: 32px;
+    font-size: 18px;
+    font-family: roboto-light, sans-serif;
+    font-weight: 600;
+}
+
+#section-rules .row-other {
+    margin-top: 30px;
+}
+
+
+
+/*
+-----------------------------
+Section - Simulation
+-----------------------------
+*/
+
+.btn-console {
+    height: 50px;
+    min-width: 80px;
+    box-shadow: 5px 5px 15px #888;
+    margin-right: 15px;
+    font-size: 20px;
+    font-weight: 400;
+    border-radius: 0px;
+    width: 100px;
+    background-color: white;
+    color: black;
+    border: none;
 
 }
 
-#section-intro .jumbotron {
-    background-color: transparent;
+.btn-console:hover {
+    color: #04ce92;
+    border: none;
+}
+
+
+
+.btn-console:active {
+    color: #04ce92;
+  transform: translateY(5px);
+  box-shadow: 3px 3px 8px #888;
 }
 
 
@@ -55,10 +170,26 @@ body {
     background-color: #E2F0FF;
     background-color: #2F6690;
     color: white;
+    background-color: #f3f3f3;
+    color: black;
 }
 
-#section-simulation .row-console {
-    padding: 30px 0px;
+#section-simulation #drag-icons {
+
+    position: absolute;
+    left: -1000px;
+
+}
+
+#section-simulation .pop-graph {
+    border: 1px solid black;
+    width: 100%;
+    height: 300px;
+}
+
+#section-simulation .row-still {
+    //display: flex;
+    //align-items: center;
 }
 
 #section-simulation .row-console {
@@ -69,11 +200,61 @@ body {
 #section-simulation figure {
     display: inline-block;
     text-align: center;
+    margin-right: 20px;
+    display: inline-table;
 }
 
-#section-rules {
-    padding: 100px 0px;
+#section-simulation figure img {
+    box-shadow: 5px 5px 15px #888;
 }
 
 
 
+
+#section-simulation h4 {
+    font-family: 'Roboto-light';
+    line-height: 1.6;
+    border-bottom: 1px solid darkgrey;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+#section-simulation form.text-pattern {
+        display: inline-table;
+    margin-right: 25px;
+}
+
+
+#section-simulation form.text-pattern input {
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    border-bottom: 3px solid black;
+    margin-right: 15px;
+    font-size: 20px;
+    color: black;
+    width: 200px;
+    display: inline-table;
+}
+
+
+#section-simulation form.text-pattern button {
+    width: 60px;
+}
+
+
+#section-simulation #button-puffer {
+    width: 120px;
+}
+
+
+#section-simulation .row-other {
+    margin-top: 30px;
+}
+
+
+#section-simulation figcaption {
+    margin-top: 5px;
+    font-size: 12px;
+}

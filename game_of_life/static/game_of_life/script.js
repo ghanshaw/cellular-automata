@@ -22,12 +22,104 @@
       });
 
 
+    var patternBlinker = document.getElementById('pattern-blinker');
+        patternBlinker.addEventListener('dragstart', function(ev) {
+
+        console.log(ev);
+        ev.preventDefault;
+
+        $boardOffsetTop = $("#board").offset().top
+
+
+        $('body').animate({
+                scrollTop: $boardOffsetTop - 50,
+        }, 500)
+
+        patternImg = '/static/game_of_life/images/oscillators/blinker.gif'
+
+        patternDrag = patternBlinker;
+
+        dragIcon = document.createElement('img');
+        dragIcon.src = patternBlinker.src;
+        dragIcon.style.border = '2px solid #06D6A0';
+        //dragIcon.style.border = '2px solid red';
+        //dragIcon.style.width = '500px';
+        document.getElementById('drag-icons').appendChild(dragIcon);
+
+        console.log(dragIcon)
+        ev.dataTransfer.setDragImage(dragIcon, -10, -10);
+
+    });
+
+    patternBlinker.addEventListener('drag', function(ev) {
+
+        //console.log(ev);
+
+
+    })
+
+
+    patternBlinker.addEventListener('dragend', function(ev) {
+
+        console.log(ev);
+
+
+    })
+
+
+    var btnStep = document.getElementById('button-step');
+    var hammerBtnStep = new Hammer(btnStep);
+    hammerBtnStep.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+    hammerBtnStep.on('pan', function(ev) {
+
+        console.log(ev);
+
+
+
+    })
+
+    var patterns = document.getElementsByClassName('pattern');
+    var hammerPatterns = [];
+    for (var i = 0; i < patterns.length; i++ ) {
+
+        var hammerPattern = new Hammer(patterns[i]);
+        hammerPattern.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+        hammerPattern.on('pan', function(ev) {
+            console.log(ev);
+            console.log(ev.deltaX);
+            console.log(ev.deltaY);
+            //dX =
+            translation = 'translate(' + ev.deltaX + 'px ,' + ev.deltaY + 'px)'
+            console.log(translation);
+            console.log(this);
+
+
+            $boardOffsetTop = $("#board").offset().top
+
+            $('body').animate({
+                scrollTop: $boardOffsetTop
+            }, 200)
+
+            //$(window).scrollTop($boardOffsetTop)
+            //this.style.property('transform', )
+            translation = 'translate(' + ev.deltaX + 'px ,' + ev.deltaY + 'px)'
+            //ev.target.style.transform = translation;
+            console.log(translation);
+            console.log(this);
+        })
+
+        hammerPatterns.push(hammerPattern);
+
+    }
+
+    //hammerPatterns.get('pan').set({ direction: Hammer.DIRECTION_ALL });
+
+
+
+
    });
-
-
-
-
-
 
 
 
@@ -113,7 +205,7 @@ function draw() {
     ctx.fillStyle = "#06D6A0";
 
     // Slategrey
-    ctx.fillStyle = "slategrey";
+    //ctx.fillStyle = "slategrey";
 
 
     for (var i = 0; i < json_data.length; i++) {
