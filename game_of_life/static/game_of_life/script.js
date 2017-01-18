@@ -1,135 +1,190 @@
+//*************************************************//
+// Function to apply Slideout menu
+//*************************************************//
 
+// Creates the Slideout Menu
+function applySlideoutMenu() {
 
-
-
-
-   $(document).ready(function() {
-
-
-     var slideout = new Slideout({
-    'panel': document.getElementById('panel'),
-    'menu': document.getElementById('menu'),
-    'padding': 256,
-    'tolerance': 70
-
-
-  });
-
-        // Toggle button
-      document.querySelector('.toggle-button').addEventListener('click', function() {
-        slideout.toggle();
-        $(this).toggleClass('is-active');
-      });
-
-
-    var patternBlinker = document.getElementById('pattern-blinker');
-        patternBlinker.addEventListener('dragstart', function(ev) {
-
-        console.log(ev);
-        ev.preventDefault;
-
-        $boardOffsetTop = $("#board").offset().top
-
-
-        $('body').animate({
-                scrollTop: $boardOffsetTop - 50,
-        }, 500)
-
-        patternImg = '/static/game_of_life/images/oscillators/blinker.gif'
-
-        patternDrag = patternBlinker;
-
-        dragIcon = document.createElement('img');
-        dragIcon.src = patternBlinker.src;
-        dragIcon.style.border = '2px solid #06D6A0';
-        //dragIcon.style.border = '2px solid red';
-        //dragIcon.style.width = '500px';
-        document.getElementById('drag-icons').appendChild(dragIcon);
-
-        console.log(dragIcon)
-        ev.dataTransfer.setDragImage(dragIcon, -10, -10);
-
+    // Create Slideout Element
+    var slideout = new Slideout({
+        'panel': document.getElementById('panel'),
+        'menu': document.getElementById('menu'),
+        'padding': 256,
+        'tolerance': 70
     });
 
-    patternBlinker.addEventListener('drag', function(ev) {
+    // Toggle slideout button
+    document.querySelector('.toggle-button').addEventListener('click', function() {
+        slideout.toggle();
+        $(this).toggleClass('is-active');
+    });
 
-        //console.log(ev);
-
-
-    })
-
-
-    patternBlinker.addEventListener('dragend', function(ev) {
-
-        console.log(ev);
+}
 
 
-    })
+//*************************************************//
+// Class to track edges of a DOM element
+//*************************************************//
+
+// Edges Class stores the edges of an element
+var Edges = function(element) {
+    var $element = $(element);
+
+    var top = $element.offset().top;
+    var left = $element.offset().left;
+    var right = left + $element.width();
+    var bottom = top + $element.height();
+
+    var edges = {
+        top: top,
+        left: left,
+        right: right,
+        bottom: bottom
+    }
+
+    // inBound method evaluates whether element a is within the bounds of element b
+    // ex: a.inBound(edgesB) returns true if a is within b
+    edges.inBounds = function(outer) {
+
+        return top > outer.top && left > outer.left && right < outer.right && bottom < outer.bottom;
+
+    }
+
+    return edges;
+}
 
 
-    var btnStep = document.getElementById('button-step');
-    var hammerBtnStep = new Hammer(btnStep);
-    hammerBtnStep.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
-    hammerBtnStep.on('pan', function(ev) {
-
-        console.log(ev);
+var json_data;
 
 
+$(document).ready(function() {
 
-    })
+    $grid = $('#grid');
 
+
+    // Create menu
+    applySlideoutMenu();
+
+    // Create WebSocket connection
+    var socket = ServerConnect();
+
+    // Create simulation
+    var simulation = Simulation();
+
+    socket.onopen = function() {
+
+        simulation.startSimulation();
+
+    }
+
+
+     socket.onmessage = function(e) {
+
+        //console.log(e.data);
+        socket.proceed = $.parseJSON(e.data)['proceed'];
+        socket.grid = $.parseJSON(e.data)['grid'];
+        //draw();
+
+        if (socket.proceed) {
+            simulation.grid = socket.grid;
+            simulation.drawGrid();
+        }
+
+    }
+
+
+
+
+    // Create HammerJS instances
     var patterns = document.getElementsByClassName('pattern');
     var hammerPatterns = [];
-    for (var i = 0; i < patterns.length; i++ ) {
+    for (var i = 0; i < patterns.length; i++) {
 
         var hammerPattern = new Hammer(patterns[i]);
-        hammerPattern.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
-        hammerPattern.on('pan', function(ev) {
-            console.log(ev);
-            console.log(ev.deltaX);
-            console.log(ev.deltaY);
-            //dX =
-            translation = 'translate(' + ev.deltaX + 'px ,' + ev.deltaY + 'px)'
-            console.log(translation);
-            console.log(this);
+        hammerPattern.get('pan').set({
+            direction: Hammer.DIRECTION_ALL
+        });
 
+        hammerPattern.on('panstart', function(ev) {
 
-            $boardOffsetTop = $("#board").offset().top
+            $boardOffsetTop = $grid.offset().top
 
             $('body').animate({
-                scrollTop: $boardOffsetTop
-            }, 200)
+                scrollTop: $boardOffsetTop - 50
+            }, 500)
 
-            //$(window).scrollTop($boardOffsetTop)
-            //this.style.property('transform', )
-            translation = 'translate(' + ev.deltaX + 'px ,' + ev.deltaY + 'px)'
-            //ev.target.style.transform = translation;
+
+        });
+
+
+        hammerPattern.on('pan', function(ev) {
+
+            var $pattern = $(ev.target);
+
+            dx = ev.srcEvent.pageX - ev.target.x;
+            dy = ev.srcEvent.pageY - ev.target.y;
+
+            translation = 'translate(' + dx + 'px ,' + dy + 'px)'
+
+            ev.target.style.transform = translation;
             console.log(translation);
-            console.log(this);
+
+
+
+
+            // Check the pattern is within bounds of board
+            var gridEdges = Edges($grid);
+            var patternEdges = Edges($pattern);
+
+
+            if (patternEdges.inBounds(gridEdges)) {
+
+                console.log('inBounds');
+                $pattern.css('border', '2px solid yellow');
+
+            } else {
+
+                $pattern.css('border', 'none');
+
+            }
+
+
+        })
+
+        hammerPattern.on('panend', function(ev) {
+
+            var $pattern = $(ev.target);
+
+            var gridEdges = Edges($grid);
+            var patternEdges = Edges($pattern);
+
+            // Compute the x, y within grid
+            if (patternEdges.inBounds(gridEdges)) {
+
+                y = gridEdges.top - patternEdges.top;
+                x = gridEdges.left - patternEdges.left;
+
+                x = Math.abs(x);
+                y = Math.abs(y);
+
+                simulation.dropPattern(x, y, $pattern);
+
+
+                console.log("Panend");
+                console.log([x, y]);
+
+                // Compute corresponding x,y within grid matrix
+            }
+
         })
 
         hammerPatterns.push(hammerPattern);
 
     }
 
-    //hammerPatterns.get('pan').set({ direction: Hammer.DIRECTION_ALL });
 
-
-
-
-   });
-
-
-
-
-// Test import
-console.log("Hunter X Hunter!");
-
-var json_data;
-
-$(document).ready(function() {
 
     //json_data = document.getElementById('json').innerText
     //createSocket()
@@ -137,31 +192,9 @@ $(document).ready(function() {
     //json_data = $.parseJSON(json_data)
 
 
-     // Note that the path doesn't matter for routing; any WebSocket
-    // connection gets bumped over to WebSocket consumers
-    socket = new WebSocket("ws://" + window.location.host + '/pumpkin');
-    console.log(socket)
-
-    socket.onmessage = function(e) {
-        console.log(e.data);
-        json_data = $.parseJSON(e.data)['board'];
-        draw();
-
-    }
-
-
-    socket.onopen = function() {
-        message_data = {
-            'start': true,
-            'step': true
-        }
-        socket.send(JSON.stringify(message_data));
-    }
-
-    if (socket.readyState == WebSocket.OPEN) socket.onopen();
 
     // Call onopen directly if socket is already open
-    $('#button-step').click( function() {
+    $('#button-step').click(function() {
 
         message_data = {
             'start': false,
@@ -172,28 +205,55 @@ $(document).ready(function() {
     })
 
 
-
-
-
 })
 
-function draw() {
 
-    var canvas = document.getElementById("board");
-    var ctx = canvas.getContext("2d");
-    ctx.canvas.width = $(canvas).width();;
-    ctx.canvas.height = $(canvas).height();;
-    ctx.beginPath();
+//*************************************************//
+// Class to implement the WebSocket
+//*************************************************//
 
-    var width_ctx = $(canvas).width();
-    var height_ctx = $(canvas).height();
-    var width_tiles = json_data.length;
-    var width_cell = width_ctx/width_tiles;
-    var height_tiles = json_data[0].length;
 
-    var min_cell_width = 5;
+var ServerConnect = function() {
 
-    ctx.fillStyle = "#B0D7FF";
+    // Note that the path doesn't matter for routing; any WebSocket
+    // connection gets bumped over to WebSocket consumers
+    socket = new WebSocket("ws://" + window.location.host + '/game-of-life');
+
+    console.log(socket)
+
+
+
+    socket.onopen = function() {
+        message_data = {
+            'start': true,
+            'step': true
+        }
+        socket.send(JSON.stringify(message_data));
+        //simulation.startSimulation();
+    }
+
+    socket.isOpen = socket.readyState == WebSocket.OPEN;
+
+    return socket;
+
+}
+
+
+
+//*************************************************//
+// Class to implement the Simulation
+//*************************************************//
+
+var Simulation = function() {
+
+    var canvas = document.getElementById("grid");
+
+    var obj = {};
+
+    obj.ctx = ctx = canvas.getContext("2d");
+    obj.ctxWidth = ctx.canvas.width = $(canvas).width();
+    obj.ctxHeight = ctx.canvas.height = $(canvas).height();
+
 
     // Infra red
     ctx.fillStyle = "#ef476f";
@@ -208,51 +268,154 @@ function draw() {
     //ctx.fillStyle = "slategrey";
 
 
-    for (var i = 0; i < json_data.length; i++) {
-        for (var j = 0; j < json_data[0].length; j++) {
+    ctx.beginPath();
 
-            if (json_data[j][i]) {
-                ctx.fillRect(width_cell * i, width_cell * j, width_cell, width_cell)
 
-                /*ctx.beginPath();
-                var radius = width_cell / 2;
-                ctx.arc(width_cell * i + radius, width_cell * j + radius, radius, 0, 2 * Math.PI, false);
-                ctx.fill();
+    /* Some arbitrary constant that determines the approx. length of cell side */
+    /* Should change based on the size of the screen */
+    obj.cellSide = 13;
 
-                ctx.lineWidth = 0;
-                ctx.strokeStyle = 'white';
-                ctx.strokeRect(width_cell * i, width_cell * j, width_cell, width_cell)*/
+    obj.gridWidth = Math.floor(ctx.canvas.width / obj.cellSide);
+    obj.gridHeight = Math.floor(ctx.canvas.height / obj.cellSide);
+
+    obj.cellWidth = ctx.canvas.width / obj.gridWidth;
+    obj.cellHeight = ctx.canvas.height / obj.gridHeight;
+
+
+    // Define methods
+    obj.drawCells = drawCells;
+    obj.drawGrid = drawGrid;
+    obj.clearCanvas = clearCanvas;
+    obj.startSimulation = startSimulation;
+    obj.dropPattern = dropPattern;
+
+    return obj;
+
+
+}
+
+
+//*************************************************//
+// Instance method belong to the Simulation class
+// Initiates simulation
+//*************************************************//
+
+var startSimulation = function() {
+
+    // Initiate Simulation on server-size
+
+
+    // Draw grid
+    this.drawCells();
+
+
+    // Send data to websocket
+    message_data =  {
+        'gridWidth':  this.gridWidth,
+        'gridHeight': this.gridHeight,
+        'initiate': true,
+    }
+
+    socket.send(JSON.stringify(message_data));
+
+}
+
+//*************************************************//
+// Instance method belong to the Simulation class
+// Drops pattern on simulation
+//*************************************************//
+
+var dropPattern = function(x, y, pattern) {
+
+
+
+    // Compute x and y of pattern
+    row = Math.floor(x / this.cellWidth);
+    col = Math.floor(y / this.cellHeight);
+
+    // Send pattern to websocket
+    message_data =  {
+        //'pattern':
+    }
+
+    console.log([row, col]);
+
+
+}
+
+
+//*************************************************//
+// Instance method belonging to the Simulation class
+// Draw grid
+//*************************************************//
+var drawCells = function() {
+
+    // First draw vertical lines
+    for (var i = 0; i <= this.gridWidth; i++) {
+
+        //ctx.strokeStyle = '#ADACB5';
+        this.ctx.strokeStyle = '#ddd';
+        //ctx.strokeStyle = 'blue';
+        //ctx.strokeStyle = "#06D6A0";
+        this.ctx.lineWidth = 1;
+
+        var xPos = this.cellWidth * i;
+
+        this.ctx.moveTo(xPos, 0);
+        this.ctx.lineTo(xPos, this.ctx.canvas.height);
+
+        this.ctx.stroke();
+
+    }
+
+    // Then draw horizontal lines
+    for (var i = 0; i <= this.gridHeight; i++) {
+
+        var yPos = this.cellHeight * i;
+
+        this.ctx.moveTo(0, yPos);
+        this.ctx.lineTo(this.ctx.canvas.width, yPos);
+
+        this.ctx.stroke();
+
+    }
+
+}
+
+
+//*************************************************//
+// Instance method belonging to the Simulation class
+// Draw grid
+//*************************************************//
+var drawGrid = function() {
+
+    // Clear canvas
+    this.clearCanvas();
+
+
+    // Carribean Green
+    this.ctx.fillStyle = "#06D6A0";
+
+    // First draw vertical lines
+    for (var i = 0; i <= this.gridWidth; i++) {
+        for (var j = 0; j <= this.gridHeight; j++) {
+
+            if (this.grid[j][i]) {
+                self.ctx.fillRect(i * this.cellWidth, j * this.cellHeight, this.cellWidth, this.cellHeight);
             }
 
         }
     }
 
+    this.drawCells();
+}
 
+//*************************************************//
+// Instance method belonging to the Simulation class
+// Clear canvas
+//*************************************************//
+var clearCanvas = function() {
 
-    for (var i = 0; i <= width_tiles; i++) {
-        ctx.strokeStyle = '#ADACB5';
-        ctx.strokeStyle = '#ddd';
-        ctx.lineWidth = .5;
-        var draw_x = width_cell * i
-        ctx.moveTo(draw_x, 0);
-        ctx.lineTo(width_cell * i, height_ctx);
-        ctx.stroke();
+    self.ctx.clearRect(0, 0, this.ctxWidth, this.ctxHeight);
 
-        ctx.moveTo(0, draw_x);
-        ctx.lineTo(width_ctx, width_cell * i);
-        ctx.stroke();
-    }
-
-
-
-
-
-
-};
-
-
-
-
-// Create WebSocket
-//socket = new WebSocket("ws://www.example.com/socketserver")
-
+}

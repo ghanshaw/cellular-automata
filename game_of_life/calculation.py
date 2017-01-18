@@ -1,27 +1,29 @@
 from random import randint
 from django.core.serializers.json import DjangoJSONEncoder
 
-class Board():
+class Grid():
 
 	def __init__(self, length=10, height=10):
-		self.board = self.make_board(length, height)
+		self.grid = self.make_grid(length, height)
+		self.length = length
+		self.height = height
 
-	def make_board(self, length, height):
-		board = []
+	def make_grid(self, length, height):
+		grid = []
 		self.length = length
 		self.height = height
 		for i in range(self.length):
-			board.append([])
+			grid.append([])
 			for j in range(self.height):
-				board[i].append(0)
-		return board
+				grid[i].append(0)
+		return grid
 
 	def generations(self):
 		self.generations = []
 
 
 	def gen_make(self):
-		self.next = self.make_board(self.length, self.height)
+		self.next = self.make_grid(self.length, self.height)
 
 
 
@@ -29,7 +31,7 @@ class Board():
 		for i in range(self.length):
 			for j in range(self.height):
 				if randint(0,1):
-					self.board[i][j] = 1
+					self.grid[i][j] = 1
 
 	# Step through another generations
 	def apply_rules(self, row, col):
@@ -39,16 +41,16 @@ class Board():
 				#print((i, j))
 				if i >= 0 and j >= 0 and i < self.length and j < self.height and ((i,j) != (row, col)):
 					#print((i, j))
-					self.moore_total += self.board[i][j]
+					self.moore_total += self.grid[i][j]
 					#print(self.moore_total)
 
 		total = self.moore_total
 
 
-		# Populate the new board according to the rules
+		# Populate the new grid according to the rules
 
 		# if cell is alive
-		if self.board[row][col]:
+		if self.grid[row][col]:
 			if total < 2:
 				self.next[row][col] = 0
 			elif total == 2 or total == 3:
@@ -64,28 +66,28 @@ class Board():
 
 
 	def gen_step(self):
-		# Make a new board
+		# Make a new grid
 		self.gen_make()
 
-		# Apply rules to each cell in board
+		# Apply rules to each cell in grid
 		for i in range(self.length):
 			for j in range(self.height):
 				self.apply_rules(i, j)
 
-		# Replace board
-		self.board = self.next
+		# Replace grid
+		self.grid = self.next
 
 
 
 	def __str__(self):
-		self.board_str = ''
-		print(len(self.board[0]))
-		for i in range(len(self.board[0])):
-			self.board_str += str(self.board[i]) + '\n'
-		return self.board_str
+		self.grid_str = ''
+		print(len(self.grid[0]))
+		for i in range(len(self.grid[0])):
+			self.grid_str += str(self.grid[i]) + '\n'
+		return self.grid_str
 
-	def get_board(self):
-		return self.board
+	def get_grid(self):
+		return self.grid
 
 
 '''
@@ -95,51 +97,51 @@ class Board():
     4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 '''
 
-def start(board=None):
+def start(grid=None):
 
-	global myBoard
+	global myGrid
 
-	if board is None:
-		board = Board(45, 45)
-		# Randomize board
-		myBoard = board
-		board.give_life()
+	if grid is None:
+		grid = Grid(45, 45)
+		# Randomize grid
+		myGrid = grid
+		grid.give_life()
 
-	myBoard = board
-	return myBoard
+	myGrid = grid
+	return myGrid
 
-def step(board):
+def step(grid):
 
 	# Apply rules to a generation
-	board.gen_step()
-	return board
+	grid.gen_step()
+	return grid
 
-def jsonify(board=None):
+def jsonify(grid=None):
 
-	if board is None:
+	if grid is None:
 		raise BaseException
 
-	#return DjangoJSONEncoder().encode(board.board)
+	#return DjangoJSONEncoder().encode(grid.grid)
 
-#board = Board()
+#grid = Grid()
 
 start()
 
-print(myBoard)
-step(myBoard)
-#jsonify(myBoard)
+print(myGrid)
+step(myGrid)
+#jsonify(myGrid)
 
 i = 29
 j = 27
 
-exploder = Board()
-exploder.board[5][5] = 1
-exploder.board[6][4] = 1
-exploder.board[6][5] = 1
-exploder.board[6][6] = 1
-exploder.board[7][4] = 1
-exploder.board[7][6] = 1
-exploder.board[8][5] = 1
+exploder = Grid()
+exploder.grid[5][5] = 1
+exploder.grid[6][4] = 1
+exploder.grid[6][5] = 1
+exploder.grid[6][6] = 1
+exploder.grid[7][4] = 1
+exploder.grid[7][6] = 1
+exploder.grid[8][5] = 1
 
 
 #print((i,j) == (29, 27))
