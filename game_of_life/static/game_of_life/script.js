@@ -94,10 +94,10 @@ $(document).ready(function() {
     }
 
 
-
-
     // Create HammerJS instances
-    var patterns = document.getElementsByClassName('pattern');
+    var patterns = document.getElementsByClassName('pattern-overlay');
+    var $patterns = $(patterns);
+    console.log(patterns);
     var hammerPatterns = [];
     for (var i = 0; i < patterns.length; i++) {
 
@@ -109,12 +109,29 @@ $(document).ready(function() {
 
         hammerPattern.on('panstart', function(ev) {
 
-            $boardOffsetTop = $grid.offset().top
+            if (!$(ev.target).is($patterns)) {
+                console.log('hell yeah!')
+                return;
+            }
+
+            console.log('this');
+            console.log(this);
+
+            var $pattern = $(ev.target);
+            var $patternWrapper = $(ev.target.parentElement);
+
+            $patternWrapper.removeClass('slow-transition');
+
+            var $gridOffsetTop = $grid.offset().top
 
             $('body').animate({
-                scrollTop: $boardOffsetTop - 50
+                scrollTop: $gridOffsetTop - 50
             }, 500)
 
+            console.log($pattern);
+            //var $dragImg = $pattern.clone();
+            //$dragImg.appendTo($('#pattern-block')[0].parentNode);
+            //console.log($dragImg);
 
         });
 
@@ -123,30 +140,46 @@ $(document).ready(function() {
 
             var $pattern = $(ev.target);
 
+            var $patternWrapper = $(ev.target.parentElement);
+
+
+            //var $dragImg
+
+            $pattern.addClass('dragging');
+
+            console.log('ev')
+            console.log(ev);
+            console.log("ev.target")
+            console.log(ev.target);
+
+
             dx = ev.srcEvent.pageX - ev.target.x;
             dy = ev.srcEvent.pageY - ev.target.y;
 
-            translation = 'translate(' + dx + 'px ,' + dy + 'px)'
 
-            ev.target.style.transform = translation;
+            var translation = 'translate(' + dx + 'px ,' + dy + 'px)'
+
+            $patternWrapper.css('transform', translation);
+
+            //$dragImg.css('transform', translation);
+            //console.log($dragImg);
             console.log(translation);
-
-
 
 
             // Check the pattern is within bounds of board
             var gridEdges = Edges($grid);
-            var patternEdges = Edges($pattern);
+            var patternEdges = Edges($patternWrapper);
 
 
             if (patternEdges.inBounds(gridEdges)) {
 
                 console.log('inBounds');
-                $pattern.css('border', '2px solid yellow');
+                $pattern.addClass('in-bounds');
+                $patternWrapper.addClass('in-bounds');
 
             } else {
-
-                $pattern.css('border', 'none');
+                $pattern.removeClass('in-bounds');
+                $patternWrapper.removeClass('in-bounds');
 
             }
 
@@ -156,6 +189,10 @@ $(document).ready(function() {
         hammerPattern.on('panend', function(ev) {
 
             var $pattern = $(ev.target);
+            var $patternWrapper = $(ev.target.parentElement);
+
+            //var patternName
+            var patternName = ev.target.id.split('-')[1];
 
             var gridEdges = Edges($grid);
             var patternEdges = Edges($pattern);
@@ -163,19 +200,50 @@ $(document).ready(function() {
             // Compute the x, y within grid
             if (patternEdges.inBounds(gridEdges)) {
 
-                y = gridEdges.top - patternEdges.top;
-                x = gridEdges.left - patternEdges.left;
+
+                // Remove styling, fade element and return it
+                $patternWrapper.fadeOut(500, function() {
+                    $pattern.removeClass('dragging  in-bounds');
+                    $patternWrapper.removeClass('in-bounds').css('transform', 'none').show();
+
+                });
+
+                // Put element back
+
+
+
+                // Compute row and column of pattern in grid
+                var y = gridEdges.top - patternEdges.top;
+                var x = gridEdges.left - patternEdges.left;
 
                 x = Math.abs(x);
                 y = Math.abs(y);
 
-                simulation.dropPattern(x, y, $pattern);
+                simulation.dropPattern(x, y, patternName);
 
 
                 console.log("Panend");
                 console.log([x, y]);
 
                 // Compute corresponding x,y within grid matrix
+            }
+            // If pan ends and pattern is not within bounds
+            else {
+
+                //var $gridOffsetTop = $grid.offset().top
+                console.log('not in bounds');
+
+                var translation = 'translate(0px, 0px)';
+
+                console.log($patternWrapper)
+
+                $patternWrapper.addClass('slow-transition');
+
+                $patternWrapper.css('transform', translation);
+
+                $pattern.removeClass('dragging in-bounds');
+                $patternWrapper.removeClass('in-bounds');
+
             }
 
         })
@@ -275,15 +343,15 @@ var Simulation = function() {
     /* Should change based on the size of the screen */
     obj.cellSide = 13;
 
-    obj.gridWidth = Math.floor(ctx.canvas.width / obj.cellSide);
-    obj.gridHeight = Math.floor(ctx.canvas.height / obj.cellSide);
+    obj.gridCols = Math.floor(ctx.canvas.width / obj.cellSide);
+    obj.gridRows = Math.floor(ctx.canvas.height / obj.cellSide);
 
-    obj.cellWidth = ctx.canvas.width / obj.gridWidth;
-    obj.cellHeight = ctx.canvas.height / obj.gridHeight;
+    obj.cellWidth = ctx.canvas.width / obj.gridCols;
+    obj.cellHeight = ctx.canvas.height / obj.gridRows;
 
 
     // Define methods
-    obj.drawCells = drawCells;
+    obj.drawRowsCols = drawRowsCols;
     obj.drawGrid = drawGrid;
     obj.clearCanvas = clearCanvas;
     obj.startSimulation = startSimulation;
@@ -306,13 +374,13 @@ var startSimulation = function() {
 
 
     // Draw grid
-    this.drawCells();
+    this.drawRowsCols();
 
 
     // Send data to websocket
     message_data =  {
-        'gridWidth':  this.gridWidth,
-        'gridHeight': this.gridHeight,
+        'cols':  this.gridCols,
+        'rows': this.gridRows,
         'initiate': true,
     }
 
@@ -329,15 +397,22 @@ var dropPattern = function(x, y, pattern) {
 
 
 
+
+
+
     // Compute x and y of pattern
-    row = Math.floor(x / this.cellWidth);
-    col = Math.floor(y / this.cellHeight);
+    row = Math.floor(y / this.cellWidth);
+    col = Math.floor(x / this.cellHeight);
 
     // Send pattern to websocket
     message_data =  {
-        //'pattern':
+        row: row,
+        col: col,
+        pattern: pattern,
+        command: 'dropPattern'
     }
 
+    socket.send(JSON.stringify(message_data));
     console.log([row, col]);
 
 
@@ -348,10 +423,10 @@ var dropPattern = function(x, y, pattern) {
 // Instance method belonging to the Simulation class
 // Draw grid
 //*************************************************//
-var drawCells = function() {
+var drawRowsCols = function() {
 
-    // First draw vertical lines
-    for (var i = 0; i <= this.gridWidth; i++) {
+    // First draw columns lines
+    for (var i = 0; i <= this.gridCols; i++) {
 
         //ctx.strokeStyle = '#ADACB5';
         this.ctx.strokeStyle = '#ddd';
@@ -368,8 +443,8 @@ var drawCells = function() {
 
     }
 
-    // Then draw horizontal lines
-    for (var i = 0; i <= this.gridHeight; i++) {
+    // Then draw row lines
+    for (var i = 0; i <= this.gridRows; i++) {
 
         var yPos = this.cellHeight * i;
 
@@ -396,18 +471,19 @@ var drawGrid = function() {
     // Carribean Green
     this.ctx.fillStyle = "#06D6A0";
 
-    // First draw vertical lines
-    for (var i = 0; i <= this.gridWidth; i++) {
-        for (var j = 0; j <= this.gridHeight; j++) {
-
-            if (this.grid[j][i]) {
-                self.ctx.fillRect(i * this.cellWidth, j * this.cellHeight, this.cellWidth, this.cellHeight);
+    // Draw the grid (row, col)
+    for (var row = 0; row < this.gridRows; row++) {
+        for (var col = 0; col < this.gridCols; col++) {
+            //console.log('(row, col) -->' + [row, col])
+            if (this.grid[row][col]) {
+                // fillRect(x, y, width, height)
+                self.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
             }
 
         }
     }
 
-    this.drawCells();
+    this.drawRowsCols();
 }
 
 //*************************************************//

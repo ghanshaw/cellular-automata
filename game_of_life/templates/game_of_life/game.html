@@ -198,32 +198,16 @@
 				<div class='col-md-6'>
 					<h4>Still Lifes</h4>
 
-					<figure>
-						<img class="pattern" id="pattern-block" src="{% static 'game_of_life/images/still_lifes/block.svg' %}" alt="" >
-						<figcaption>Block</figcaption>
-					</figure>
 
+					{% for pattern in still_lifes %}
 					<figure>
-						<img class="pattern" id="pattern-beehive" src="{% static 'game_of_life/images/still_lifes/beehive.svg' %}" alt="" >
+						 <div class="pattern-wrapper" draggable="">
+							<img id="pattern-{{ pattern.pattern }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 </div>
+						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>Beehive</figcaption>
 					</figure>
-
-
-					<figure>
-						<img class="pattern" id="pattern-loaf" src="{% static 'game_of_life/images/still_lifes/loaf.svg' %}" alt="" >
-						<figcaption>Loaf</figcaption>
-					</figure>
-
-					<figure>
-						<img class="pattern" id="pattern-boat" src="{% static 'game_of_life/images/still_lifes/boat.svg' %}" alt="" >
-						<figcaption>Boat</figcaption>
-					</figure>
-
-					<figure>
-						<img class="pattern" id="pattern-flower" src="{% static 'game_of_life/images/still_lifes/flower.svg' %}" alt="" >
-						<figcaption>Flower</figcaption>
-					</figure>
-
+					{% endfor %}
 
 				</div>
 

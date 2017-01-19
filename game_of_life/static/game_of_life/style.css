@@ -202,13 +202,45 @@ Section - Simulation
     text-align: center;
     margin-right: 20px;
     display: inline-table;
+    position: relative;
 }
+
+#section-simulation .pattern-wrapper {
+    //background-color: #06D6A0;
+    position: absolute;
+}
+
 
 #section-simulation figure img {
     box-shadow: 5px 5px 15px #888;
+    user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#section-simulation img.pattern-overlay.dragging {
+    opacity: .75;
+    box-shadow: 0 0 7px rgb(6, 214, 160);
+    border: 1px solid rgb(6, 214, 160);
 }
 
 
+#section-simulation figure div.pattern-wrapper.in-bounds {
+    background-color: #06D6A0;
+    opacity: .75;
+}
+
+#section-simulation figure div.pattern-wrapper.slow-transition {
+    transition: transform 1s;
+}
+
+
+#section-simulation figure img.in-bounds {
+    box-shadow: 0 0 7px rgb(6, 214, 160);
+}
 
 
 #section-simulation h4 {
