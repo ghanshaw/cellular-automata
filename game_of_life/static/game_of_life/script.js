@@ -62,6 +62,22 @@ $(document).ready(function() {
 
     $grid = $('#grid');
 
+    $grid.on('mousedown touchstart', function(ev) {
+
+        console.log('jQuery Events');
+        console.log(ev);
+
+
+    })
+
+    $grid.on('mousemove touchmove', function(ev) {
+
+        //console.log('moving jQuery Events');
+        //console.log(ev);
+
+
+    })
+
 
     // Create menu
     applySlideoutMenu();
@@ -92,6 +108,68 @@ $(document).ready(function() {
         }
 
     }
+
+
+
+    var grid = document.getElementById('grid');
+    var hammerGrid = new Hammer(grid, {
+        preventDefault: true
+    });
+
+    hammerGrid.get('pan').set({
+        direction: Hammer.DIRECTION_ALL
+    });
+
+
+
+    hammerGrid.on('panstart', function(ev) {
+
+        console.log('start');
+        console.log(ev);
+        hammerGrid.startX = ev.srcEvent.layerX;
+        hammerGrid.startY = ev.srcEvent.layerY;
+
+    })
+
+    var isScrolling = false;
+    $(window).scroll(function() {
+        isScrolling = true;
+    })
+
+    hammerGrid.on('pan', function(ev){
+
+        console.log(ev);
+
+//        startX = ev.srcEvent.layerX
+//        startY = ev.srcEvent.layerY
+
+        if(isScrolling) {
+            console.log('scrolling happened');
+            hammerGrid.startX = ev.srcEvent.layerX;
+            hammerGrid.startY = ev.srcEvent.layerY;
+            isScrolling = false;
+            console.log('new x and y: ' + [hammerGrid.startX , hammerGrid.startY]);
+            //hammerGrid.
+        }
+
+        var newX = hammerGrid.startX + ev.deltaX;
+        var newY = hammerGrid.startY + ev.deltaY;
+
+        console.log(this);
+
+
+        var rowCol = simulation.getRowCol(newX, newY);
+
+        simulation.toggleCell(rowCol.row, rowCol.col, true);
+
+        // Color this square
+
+
+        // Get x and y
+
+        // Compute row and col
+
+    })
 
 
     // Create HammerJS instances
@@ -356,6 +434,8 @@ var Simulation = function() {
     obj.clearCanvas = clearCanvas;
     obj.startSimulation = startSimulation;
     obj.dropPattern = dropPattern;
+    obj.getRowCol = getRowCol;
+    obj.toggleCell = toggleCell;
 
     return obj;
 
@@ -388,6 +468,14 @@ var startSimulation = function() {
 
 }
 
+
+var getRowCol = function(x, y) {
+    row = Math.floor(y / this.cellWidth);
+    col = Math.floor(x / this.cellHeight);
+
+    return { row: row, col: col };
+}
+
 //*************************************************//
 // Instance method belong to the Simulation class
 // Drops pattern on simulation
@@ -397,17 +485,16 @@ var dropPattern = function(x, y, pattern) {
 
 
 
-
+    var coord = this.getRowCol(x, y);
 
 
     // Compute x and y of pattern
-    row = Math.floor(y / this.cellWidth);
-    col = Math.floor(x / this.cellHeight);
+
 
     // Send pattern to websocket
     message_data =  {
-        row: row,
-        col: col,
+        row: coord.row,
+        col: coord.col,
         pattern: pattern,
         command: 'dropPattern'
     }
@@ -477,7 +564,7 @@ var drawGrid = function() {
             //console.log('(row, col) -->' + [row, col])
             if (this.grid[row][col]) {
                 // fillRect(x, y, width, height)
-                self.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
+                this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
             }
 
         }
@@ -493,5 +580,23 @@ var drawGrid = function() {
 var clearCanvas = function() {
 
     self.ctx.clearRect(0, 0, this.ctxWidth, this.ctxHeight);
+
+}
+
+
+
+
+
+var toggleCell = function(row, col, turnOn) {
+
+    if (turnOn) {
+        this.ctx.fillStyle = "#06D6A0";
+        this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
+        this.ctx.strokeRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
+    } else {
+        this.ctx.fillStyle = "white";
+        this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
+    }
+
 
 }

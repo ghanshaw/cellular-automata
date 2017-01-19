@@ -41,6 +41,11 @@
 			type="text/javascript">
 	</script>
 
+	<!-- Draggabilly -->
+	<script
+			src="https://npmcdn.com/draggabilly@2.1/dist/draggabilly.pkgd.min.js">
+	</script>
+
 	<!-- Hamburger CSS -->
 	<link
 			href="{% static 'game_of_life/hamburgers.min.css' %}"
@@ -156,10 +161,7 @@
 
 	<section id="section-simulation">
 
-
-
 		<div class="container">
-
 
 			<div class="row">
 				<div class="col-md-12">
@@ -202,10 +204,10 @@
 					{% for pattern in still_lifes %}
 					<figure>
 						 <div class="pattern-wrapper" draggable="">
-							<img id="pattern-{{ pattern.pattern }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
-						<figcaption>Beehive</figcaption>
+						<figcaption>{{ pattern.name|title }}</figcaption>
 					</figure>
 					{% endfor %}
 
@@ -213,22 +215,18 @@
 
 				<div class='col-md-6'>
 					<h4>Oscillators</h4>
+
+					{% for pattern in oscillators %}
 					<figure>
-						<img id="pattern-blinker" src="{% static 'game_of_life/images/oscillators/blinker.gif' %}" alt="" >
-						<figcaption>Blinker<br><small>(period 2)</small></figcaption>
+						 <div class="pattern-wrapper" draggable="">
+							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 </div>
+						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
+						<figcaption>{{ pattern.name|title }}<br><small>(period {{ pattern.period }})</small></figcaption>
 					</figure>
-					<figure>
-						<img src="{% static 'game_of_life/images/oscillators/toad.gif' %}" alt="" >
-						<figcaption>Toad<br><small>(period 2)</figcaption>
-					</figure>
-					<figure>
-						<img src="{% static 'game_of_life/images/oscillators/beacon.gif' %}" alt="" >
-						<figcaption>Beacon<br><small>(period 2)</figcaption>
-					</figure>
-					<figure>
-						<img src="{% static 'game_of_life/images/oscillators/Pulsar.gif' %}" alt="" >
-						<figcaption>Pulsar<br><small>(period 3)</figcaption>
-					</figure>
+					{% endfor %}
+
+
 				</div>
 
 
@@ -238,29 +236,31 @@
 
 				<div class='col-md-3'>
 					<h4>Spaceships</h4>
-					<figure>
-						<img src="{% static 'game_of_life/images/spaceships/glider.gif' %}" alt="" >
-						<figcaption>Glider</figcaption>
-					</figure>
 
+					{% for pattern in spaceships %}
 					<figure>
-						<img src="{% static 'game_of_life/images/spaceships/lwss.gif' %}" alt="" >
-						<figcaption>Lightweight Spaceship</figcaption>
+						 <div class="pattern-wrapper" draggable="">
+							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 </div>
+						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
+						<figcaption>{{ pattern.name|title }}</figcaption>
 					</figure>
+					{% endfor %}
 
 				</div>
 
-				<div class='col-md-offset-1 col-md-6'>
-					<h4>Reproduction</h4>
+				<div class='col-md-offset-1 col-md-8'>
+					<h4>Infinite Growth</h4>
 
+					{% for pattern in infinite_growth %}
 					<figure>
-						<img src="{% static 'game_of_life/images/reproduction/gosper_gun.gif' %}" alt="" >
-						<figcaption>Lightweight Spaceship</figcaption>
+						 <div class="pattern-wrapper" draggable="">
+							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 </div>
+						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
+						<figcaption>{{ pattern.name|title }}</figcaption>
 					</figure>
-					<figure>
-						<img src="{% static 'game_of_life/images/oscillators/toad.gif' %}" alt="" >
-						<figcaption>Acorn</figcaption>
-					</figure>
+					{% endfor %}
 
 				</div>
 
@@ -269,20 +269,15 @@
 
 			<div class='row row-other'>
 
-				<div class='col-md-5'>
-					<h4>User Generated</h4>
+				<div class='col-md-3'>
+					<h4>Other</h4>
 
-					<form class="form-group text-pattern">
-
-						<input type="text" class="form-control" id="text-pattern" placeholder="Text Pattern">
-
-						<button type="button" class="btn-console" id="button-text-pattern">Go</button>
-					</form>
+					<!--<form class="form-group text-pattern">-->
+						<!--<input type="text" class="form-control" id="text-pattern" placeholder="Text Pattern">-->
+						<!--<button type="button" class="btn-console" id="button-text-pattern">Go</button>-->
+					<!--</form>-->
 					<button type="button" class="btn-console" id="button-random">Random</button>
-				</div>
 
-				<div class='col-md-offset-1 col-md-2'>
-					<h4>Heavy Patterns</h4>
 					<button type="button" class="btn-console" id="button-puffer">Puffer Train</button>
 				</div>
 

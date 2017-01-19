@@ -1,14 +1,22 @@
 from random import randint
+from .models import Pattern
 from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 
 
 class Patterns():
 	pattern_dict = {
 
+		# Still Lifes
 		'block' : [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
 		'beehive' : [[0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0], [0, 1, 0, 0, 1, 0], [0, 0, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0]],
+		'flower' : [[0, 0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0 , 0], [0, 0, 0, 0, 0]],
+		'loaf' : [[0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0], [0, 1, 0, 0, 1, 0], [0, 0, 1, 0, 1, 0], [0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0]],
+		'boat' : [[0, 0, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 0, 0, 0]],
 
+		# Oscillators
+		'blinker': [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
 	}
 
 	def __init__(self):
@@ -108,7 +116,11 @@ class Grid():
 
 
 	def add_pattern(self, row, col, pattern):
-		pattern_matrix = Grid.patterns.get_pattern(pattern)
+		#pattern_matrix = Grid.patterns.get_pattern(pattern)
+		pattern_matrix = Pattern.objects.get(name=pattern)
+		print(pattern_matrix.grid)
+		pattern_matrix = json.JSONDecoder().decode(pattern_matrix.grid)
+
 
 		print('(rows, col)' + str((self.rows, self.cols)))
 

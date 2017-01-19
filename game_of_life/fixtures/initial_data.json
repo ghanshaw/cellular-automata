@@ -1,0 +1,156 @@
+[
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 1,
+    "fields": {
+      "name": "block",
+      "grid": "[[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]]",
+      "type": "still life",
+      "src_root": "game_of_life/images/still_lifes/",
+      "file_type": "svg"
+    }
+  },
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 2,
+    "fields": {
+      "name": "beehive",
+      "grid": "[[0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0], [0, 1, 0, 0, 1, 0], [0, 0, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0]]",
+      "type": "still life",
+      "src_root": "game_of_life/images/still_lifes/",
+      "file_type": "svg"
+    }
+  },
+   {
+    "model": "game_of_life.Pattern",
+     "pk": 3,
+     "fields": {
+      "name": "flower",
+      "grid": "[[0, 0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0 , 0], [0, 0, 0, 0, 0]]",
+      "type": "still life",
+      "src_root": "game_of_life/images/still_lifes/",
+      "file_type": "svg"
+    }
+  },
+   {
+    "model": "game_of_life.Pattern",
+     "pk": 4,
+     "fields": {
+      "name": "loaf",
+      "grid": "[[0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0], [0, 1, 0, 0, 1, 0], [0, 0, 1, 0, 1, 0], [0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0]]",
+      "type": "still life",
+      "src_root": "game_of_life/images/still_lifes/",
+      "file_type": "svg"
+    }
+  },
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 5,
+    "fields": {
+      "name": "boat",
+      "grid": "[[0, 0, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 0, 0, 0]]",
+      "type": "still life",
+      "src_root": "game_of_life/images/still_lifes/",
+      "file_type": "svg"
+    }
+  },
+
+
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 6,
+    "fields": {
+      "name": "blinker",
+      "grid": "[[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]]",
+      "type": "oscillators",
+      "src_root": "game_of_life/images/oscillators/",
+      "file_type": "gif",
+      "period": 2
+    }
+  },
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 7,
+    "fields": {
+      "name": "toad",
+      "grid": "[[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 1, 0], [0, 1, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]]",
+      "type": "oscillators",
+      "src_root": "game_of_life/images/oscillators/",
+      "file_type": "gif",
+      "period": 2
+    }
+  },
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 8,
+    "fields": {
+      "name": "beacon",
+      "grid": "[[0, 0, 0, 0, 0, 0], [0, 1, 1, 0, 0, 0], [0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0], [0, 0, 0, 1, 1, 0], [0, 0, 0, 0, 0, 0]]",
+      "type": "oscillators",
+      "src_root": "game_of_life/images/oscillators/",
+      "file_type": "gif",
+      "period": 2
+    }
+  },
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 9,
+    "fields": {
+      "name": "pulsar",
+      "grid": "[[0, 0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 0, 1, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0]]",
+      "type": "oscillators",
+      "src_root": "game_of_life/images/oscillators/",
+      "file_type": "gif"
+    }
+  },
+
+
+
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 10,
+    "fields": {
+      "name": "glider",
+      "grid": "[[0, 0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 0, 0, 1, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0]]",
+      "type": "spaceships",
+      "src_root": "game_of_life/images/spaceships/",
+      "file_type": "gif"
+    }
+  },
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 11,
+    "fields": {
+      "name": "lightweight spaceship",
+      "grid": "[[0, 0, 0, 0, 0, 0, 0], [0, 0, 1, 0, 0, 1, 0], [0, 1, 0, 0, 0, 0, 0], [0, 1, 0, 0, 0, 1, 0], [0, 1, 1, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0]]",
+      "type": "spaceships",
+      "src_root": "game_of_life/images/spaceships/",
+      "file_type": "gif"
+    }
+  },
+
+
+
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 12,
+    "fields": {
+      "name": "gosper glider gun",
+      "grid": "[[0, 0, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 0, 0, 0]]",
+      "type": "infinite growth",
+      "src_root": "game_of_life/images/infinite_growth/",
+      "file_type": "gif"
+    }
+  },
+  {
+    "model": "game_of_life.Pattern",
+    "pk": 13,
+    "fields": {
+      "name": "one cell thick",
+      "grid": "[[0, 0, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 0, 0, 0]]",
+      "type": "infinite growth",
+      "src_root": "game_of_life/images/infinite_growth/",
+      "file_type": "png"
+    }
+  }
+]

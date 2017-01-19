@@ -2,41 +2,21 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from . import calculation
+from .models import Pattern
 
 # Create your views here.
 def start(request):
 
-	#template = loader.get_template('game_of_life/game.html')
-
-	patternUrl = 'game_of_life/images/still_lifes/';
-
-
+	still_lifes = Pattern.objects.filter(type='still life')
+	oscillators = Pattern.objects.filter(type='oscillators')
+	spaceships = Pattern.objects.filter(type='spaceships')
+	infinite_growth = Pattern.objects.filter(type='infinite growth')
 
 	context = {
 		'is_game': True,
-		'still_lifes': [
-			{
-				'pattern': 'block',
-				'src': 'game_of_life/images/still_lifes/{}.svg'.format('block')
-			},
-			{
-				'pattern': 'flower',
-				'src': 'game_of_life/images/still_lifes/{}.svg'.format('flower')
-			},
-			{
-				'pattern': 'beehive',
-				'src': 'game_of_life/images/still_lifes/{}.svg'.format('beehive')
-			},
-			{
-				'pattern': 'loaf',
-				'src': 'game_of_life/images/still_lifes/{}.svg'.format('loaf')
-			},
-			{
-				'pattern': 'block',
-				'src': 'game_of_life/images/still_lifes/{}.svg'.format('boat')
-			},
-		]
-
+		'still_lifes': still_lifes,
+		'oscillators': oscillators,
+		'spaceships': spaceships,
+		'infinite_growth': infinite_growth
 	}
 	return render(request, 'game_of_life/game.html', context)
-	#return HttpResponse(template.render(context, request))
