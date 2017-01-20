@@ -62,22 +62,6 @@ $(document).ready(function() {
 
     $grid = $('#grid');
 
-    $grid.on('mousedown touchstart', function(ev) {
-
-        console.log('jQuery Events');
-        console.log(ev);
-
-
-    })
-
-    $grid.on('mousemove touchmove', function(ev) {
-
-        //console.log('moving jQuery Events');
-        //console.log(ev);
-
-
-    })
-
 
     // Create menu
     applySlideoutMenu();
@@ -86,7 +70,7 @@ $(document).ready(function() {
     var socket = ServerConnect();
 
     // Create simulation
-    var simulation = Simulation();
+    simulation = Simulation();
 
     socket.onopen = function() {
 
@@ -97,9 +81,17 @@ $(document).ready(function() {
 
      socket.onmessage = function(e) {
 
+        message_time = new Date();
+        //console.log(e);
+        console.log('Total time: ' + (message_time - updateEnter) + 'ms');
         //console.log(e.data);
+
+        parseStart = new Date();
         socket.proceed = $.parseJSON(e.data)['proceed'];
         socket.grid = $.parseJSON(e.data)['grid'];
+        parseEnd = new Date();
+
+        console.log('Parsed Date: ' + (parseEnd - parseStart) + 'ms');
         //draw();
 
         if (socket.proceed) {
@@ -107,98 +99,124 @@ $(document).ready(function() {
             simulation.drawGrid();
         }
 
+
+
     }
 
 
+    var consoleButtons = document.getElementsByClassName('btn-console');
 
-    var grid = document.getElementById('grid');
-    var hammerGrid = new Hammer(grid, {
-        preventDefault: true
-    });
+    var $draggieConsoleButtons = [];
 
-    hammerGrid.get('pan').set({
-        direction: Hammer.DIRECTION_ALL
-    });
+    for (var i =0; i < consoleButtons.length; i++) {
 
+        var $draggieConsoleButton = $(consoleButtons[i]).draggabilly({});
+        $draggieConsoleButton.draggabilly('disable');
 
+        // If console button is speed button, add additional event listeners
+        if ($draggieConsoleButton.hasClass('btn-speed')) {
 
-    hammerGrid.on('panstart', function(ev) {
+            // Add additional static click event to speed buttons
+            $draggieConsoleButton.on('staticClick', function(event, pointer) {
 
-        console.log('start');
-        console.log(ev);
-        hammerGrid.startX = ev.srcEvent.layerX;
-        hammerGrid.startY = ev.srcEvent.layerY;
+                $speedButton = $(event.target);
 
-    })
+                // If the speed button is inactive, then
+                // remove styling from other buttons and
+                // add styling to that button
+                if (!$speedButton.hasClass('switched-on')) {
 
-    var isScrolling = false;
-    $(window).scroll(function() {
-        isScrolling = true;
-    })
+                    $('.btn-speed').removeClass('switched-on');
+                    $speedButton.addClass('switched-on');
 
-    hammerGrid.on('pan', function(ev){
+                }
+            })
 
-        console.log(ev);
-
-//        startX = ev.srcEvent.layerX
-//        startY = ev.srcEvent.layerY
-
-        if(isScrolling) {
-            console.log('scrolling happened');
-            hammerGrid.startX = ev.srcEvent.layerX;
-            hammerGrid.startY = ev.srcEvent.layerY;
-            isScrolling = false;
-            console.log('new x and y: ' + [hammerGrid.startX , hammerGrid.startY]);
-            //hammerGrid.
         }
 
-        var newX = hammerGrid.startX + ev.deltaX;
-        var newY = hammerGrid.startY + ev.deltaY;
 
-        console.log(this);
+        // If console button is run button, add additional even listener
+        if ($draggieConsoleButton.hasClass('btn-run')) {
+
+            $draggieConsoleButton.on('staticClick', function(event, pointer) {
+
+                $runButton = $(event.target);
+
+                if ($runButton.hasClass('switched-on')) {
+                    $runButton.removeClass('switched-on');
+                    $runButton.text('Run');
+                } else {
+                    $runButton.addClass('switched-on');
+                    $runButton.text('Stop');
+                }
 
 
-        var rowCol = simulation.getRowCol(newX, newY);
+            });
+        }
+
+        $draggieConsoleButtons.push($draggieConsoleButton);
+    }
+
+
+    var $draggieGrid = $('#grid').draggabilly({});
+    $draggieGrid.draggabilly('disable');
+
+    $draggieGrid.newCells = [];
+    $draggieGrid.setCells = new Set();
+
+
+    var grid = document.getElementById('grid');
+
+    $draggieGrid.on('pointerMove', function(event, pointer) {
+
+
+
+        console.log(event);
+        console.log(pointer);
+
+        gridEdges = Edges($grid);
+        gridX = pointer.pageX - gridEdges.left;
+        gridY = pointer.pageY - gridEdges.top;
+
+        console.log(gridX, gridY);
+
+        var rowCol = simulation.getRowCol(gridX, gridY);
+
+        var cellId = parseFloat(rowCol.row + '.' + rowCol.col);
+        console.log(cellId);
+
+        if (!$draggieGrid.setCells.has(cellId)) {
+            $draggieGrid.newCells.push(rowCol);
+            $draggieGrid.setCells.add(cellId);
+        }
 
         simulation.toggleCell(rowCol.row, rowCol.col, true);
 
-        // Color this square
+
+    });
+
+    $draggieGrid.on('pointerUp', function(event, pointer) {
 
 
-        // Get x and y
-
-        // Compute row and col
+        simulation.activateCells($draggieGrid.newCells);
+        $draggieGrid.setCells.clear();
+        $draggieGrid.newCells = [];
 
     })
 
 
-    // Create HammerJS instances
-    var patterns = document.getElementsByClassName('pattern-overlay');
-    var $patterns = $(patterns);
-    console.log(patterns);
-    var hammerPatterns = [];
+    var patterns = document.getElementsByClassName('pattern-wrapper');
+    //var $patterns = $('.pattern-overlay');
+
+    var $draggiePatterns = [];
+
     for (var i = 0; i < patterns.length; i++) {
 
-        var hammerPattern = new Hammer(patterns[i]);
+        var $draggiePattern = $(patterns[i]).draggabilly();
 
-        hammerPattern.get('pan').set({
-            direction: Hammer.DIRECTION_ALL
-        });
+        $draggiePattern.on('dragStart', function(event, pointer) {
 
-        hammerPattern.on('panstart', function(ev) {
-
-            if (!$(ev.target).is($patterns)) {
-                console.log('hell yeah!')
-                return;
-            }
-
-            console.log('this');
-            console.log(this);
-
-            var $pattern = $(ev.target);
-            var $patternWrapper = $(ev.target.parentElement);
-
-            $patternWrapper.removeClass('slow-transition');
+            //var $patternWrapper = $(ev.target.parentElement);
 
             var $gridOffsetTop = $grid.offset().top
 
@@ -206,47 +224,27 @@ $(document).ready(function() {
                 scrollTop: $gridOffsetTop - 50
             }, 500)
 
-            console.log($pattern);
-            //var $dragImg = $pattern.clone();
-            //$dragImg.appendTo($('#pattern-block')[0].parentNode);
-            //console.log($dragImg);
-
-        });
 
 
-        hammerPattern.on('pan', function(ev) {
-
-            var $pattern = $(ev.target);
-
-            var $patternWrapper = $(ev.target.parentElement);
-
-
-            //var $dragImg
-
-            $pattern.addClass('dragging');
-
-            console.log('ev')
-            console.log(ev);
-            console.log("ev.target")
-            console.log(ev.target);
-
-
-            dx = ev.srcEvent.pageX - ev.target.x;
-            dy = ev.srcEvent.pageY - ev.target.y;
-
-
-            var translation = 'translate(' + dx + 'px ,' + dy + 'px)'
-
-            $patternWrapper.css('transform', translation);
-
-            //$dragImg.css('transform', translation);
-            //console.log($dragImg);
-            console.log(translation);
-
+            var draggieData = $draggiePattern.data('draggabilly');
+            //console.log(draggieData);
 
             // Check the pattern is within bounds of board
+
+        })
+
+        $draggiePattern.on('dragMove', function(event, pointer){
+
+            var $pattern = $(event.currentTarget).find('img');
+            var $patternWrapper = $(event.currentTarget);
+
             var gridEdges = Edges($grid);
             var patternEdges = Edges($patternWrapper);
+
+            console.log(event.currentTarget);
+            console.log(pointer);
+            console.log(patternEdges);
+            console.log(gridEdges);
 
 
             if (patternEdges.inBounds(gridEdges)) {
@@ -261,16 +259,15 @@ $(document).ready(function() {
 
             }
 
-
         })
 
-        hammerPattern.on('panend', function(ev) {
+        $draggiePattern.on('dragEnd', function(event, pointer) {
 
-            var $pattern = $(ev.target);
-            var $patternWrapper = $(ev.target.parentElement);
+            var $pattern = $(event.currentTarget).find('img');
+            var $patternWrapper = $(event.currentTarget);
 
             //var patternName
-            var patternName = ev.target.id.split('-')[1];
+            var patternName = event.target.id.split('-')[1];
 
             var gridEdges = Edges($grid);
             var patternEdges = Edges($pattern);
@@ -281,8 +278,8 @@ $(document).ready(function() {
 
                 // Remove styling, fade element and return it
                 $patternWrapper.fadeOut(500, function() {
-                    $pattern.removeClass('dragging  in-bounds');
-                    $patternWrapper.removeClass('in-bounds').css('transform', 'none').show();
+                    $pattern.removeClass('in-bounds');
+                    $patternWrapper.removeClass('in-bounds').css({ 'left': 0, 'top': 0 }).show();
 
                 });
 
@@ -297,7 +294,9 @@ $(document).ready(function() {
                 x = Math.abs(x);
                 y = Math.abs(y);
 
-                simulation.dropPattern(x, y, patternName);
+                console.log(patternName);
+
+                simulation.addPattern(x, y, patternName);
 
 
                 console.log("Panend");
@@ -311,22 +310,31 @@ $(document).ready(function() {
                 //var $gridOffsetTop = $grid.offset().top
                 console.log('not in bounds');
 
+
+                $patternWrapper.animate({
+
+                    left: 0,
+                    top: 0,
+
+                }, 500);
+
                 var translation = 'translate(0px, 0px)';
 
                 console.log($patternWrapper)
 
-                $patternWrapper.addClass('slow-transition');
+                //$patternWrapper.addClass('slow-transition');
 
-                $patternWrapper.css('transform', translation);
+                //$patternWrapper.css('transform', translation);
 
-                $pattern.removeClass('dragging in-bounds');
+                $pattern.removeClass('in-bounds');
                 $patternWrapper.removeClass('in-bounds');
 
             }
 
         })
 
-        hammerPatterns.push(hammerPattern);
+
+        $draggiePatterns.push($draggiePattern);
 
     }
 
@@ -336,20 +344,6 @@ $(document).ready(function() {
     //createSocket()
 
     //json_data = $.parseJSON(json_data)
-
-
-
-    // Call onopen directly if socket is already open
-    $('#button-step').click(function() {
-
-        message_data = {
-            'start': false,
-            'step': true
-        }
-        socket.send(JSON.stringify(message_data));
-
-    })
-
 
 })
 
@@ -376,6 +370,8 @@ var ServerConnect = function() {
         }
         socket.send(JSON.stringify(message_data));
         //simulation.startSimulation();
+
+
     }
 
     socket.isOpen = socket.readyState == WebSocket.OPEN;
@@ -419,7 +415,7 @@ var Simulation = function() {
 
     /* Some arbitrary constant that determines the approx. length of cell side */
     /* Should change based on the size of the screen */
-    obj.cellSide = 13;
+    obj.cellSide = 10;
 
     obj.gridCols = Math.floor(ctx.canvas.width / obj.cellSide);
     obj.gridRows = Math.floor(ctx.canvas.height / obj.cellSide);
@@ -427,20 +423,82 @@ var Simulation = function() {
     obj.cellWidth = ctx.canvas.width / obj.gridCols;
     obj.cellHeight = ctx.canvas.height / obj.gridRows;
 
+    obj.simSpeed = 'slow';
+
 
     // Define methods
     obj.drawRowsCols = drawRowsCols;
     obj.drawGrid = drawGrid;
     obj.clearCanvas = clearCanvas;
     obj.startSimulation = startSimulation;
-    obj.dropPattern = dropPattern;
+    obj.addPattern = addPattern;
     obj.getRowCol = getRowCol;
     obj.toggleCell = toggleCell;
+    obj.activateCells = activateCells;
+    obj.updateSimulation = updateSimulation;
+    obj.runSimulation = runSimulation;
+    obj.stopSimulation = stopSimulation;
+    obj.bindConsoleButtons = bindConsoleButtons;
+
+    obj.simIntervals = {
+        'slow': 200,
+        'medium': 100,
+        'fast': 50
+    }
 
     return obj;
 
-
 }
+
+var bindConsoleButtons = function() {
+
+
+    $('#button-step').click(function() {
+
+        simulation.updateSimulation();
+
+    })
+
+    $('#button-run').click(function() {
+
+        if ($(this).hasClass('switched-on')) {
+            simulation.runSimulation();
+        } else {
+            simulation.stopSimulation();
+        }
+
+    })
+
+    $('.btn-speed').click(function(event) {
+
+        // Update the simulation speed
+        simulation.stopSimulation();
+        simulation.simSpeed = event.target.id.split[1];
+
+        if ($(this).hasClass('switched-on')) {
+            simulation.runSimulation();
+        }
+
+    })
+
+
+    $('#button-random').click(function() {
+
+        message_data = { 'command': 'random' };
+        socket.send(JSON.stringify(message_data));
+
+    })
+
+
+    $('#button-clear').click(function() {
+
+        message_data = { 'command': 'clear' };
+        socket.send(JSON.stringify(message_data));
+
+
+    })
+}
+
 
 
 //*************************************************//
@@ -450,8 +508,10 @@ var Simulation = function() {
 
 var startSimulation = function() {
 
-    // Initiate Simulation on server-size
+    this.bindConsoleButtons();
 
+    // Initiate Simulation on server-size
+    $('#button-' + this.simSpeed).addClass('switched-on');
 
     // Draw grid
     this.drawRowsCols();
@@ -461,9 +521,10 @@ var startSimulation = function() {
     message_data =  {
         'cols':  this.gridCols,
         'rows': this.gridRows,
-        'initiate': true,
+        'command': 'createGrid'
     }
 
+    updateEnter = new Date();
     socket.send(JSON.stringify(message_data));
 
 }
@@ -481,9 +542,7 @@ var getRowCol = function(x, y) {
 // Drops pattern on simulation
 //*************************************************//
 
-var dropPattern = function(x, y, pattern) {
-
-
+var addPattern = function(x, y, pattern) {
 
     var coord = this.getRowCol(x, y);
 
@@ -496,14 +555,59 @@ var dropPattern = function(x, y, pattern) {
         row: coord.row,
         col: coord.col,
         pattern: pattern,
-        command: 'dropPattern'
+        command: 'addPattern',
     }
 
+    console.log('message_data');
     socket.send(JSON.stringify(message_data));
     console.log([row, col]);
 
 
 }
+
+var updateSimulation = function() {
+
+    updateEnter = new Date();
+    message_data = { 'command': 'step' };
+    socket.send(JSON.stringify(message_data));
+
+}
+
+var runSimulation = function() {
+
+    var interval = this.simIntervals[this.simSpeed];
+    this.simInterval = setInterval(updateSimulation, 500);
+
+}
+
+var stopSimulation = function() {
+
+    clearInterval(this.simInterval)
+
+}
+
+//*************************************************//
+// Instance method belong to the Simulation class
+// Drops pattern on simulation
+//*************************************************//
+var activateCells = function(newCells) {
+
+    console.log(newCells);
+    console.log(newCells.length);
+
+    //newCells = JSON.stringify(newCells);
+
+    //console.log(json);
+
+       message_data =  {
+        newCells: newCells,
+        command: 'activateCells',
+    }
+
+     socket.send(JSON.stringify(message_data));
+
+}
+
 
 
 //*************************************************//
@@ -551,6 +655,8 @@ var drawRowsCols = function() {
 //*************************************************//
 var drawGrid = function() {
 
+    var drawStart = new Date();
+
     // Clear canvas
     this.clearCanvas();
 
@@ -571,6 +677,9 @@ var drawGrid = function() {
     }
 
     this.drawRowsCols();
+
+    var drawEnd = new Date();
+    console.log('Draw Time: ' + (drawEnd - drawStart) + 'ms')
 }
 
 //*************************************************//

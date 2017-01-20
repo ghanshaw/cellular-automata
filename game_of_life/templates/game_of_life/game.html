@@ -114,7 +114,6 @@
 					<h1 class="page-title">Conway's Game of Life</h1>
 
 				</div>
-
 			</div>
 		</div>
 	</section>
@@ -185,9 +184,11 @@
 				<div class='col-md-12'>
 					<h4>Console</h4>
 					<button type="button" class="btn-console" id="button-step">Step</button>
-					<button type="button" class="btn-console" id="button-run">Run</button>
-					<button type="button" class="btn-console" id="button-stop">Stop</button>
+					<button type="button" class="btn-console btn-run switch" id="button-run">Run</button>
 					<button type="button" class="btn-console" id="button-clear">Clear</button>
+					<button type="button" class="btn-console btn-speed switch" id="button-slow"> > </button>
+					<button type="button" class="btn-console btn-speed switch" id="button-medium"> >> </button>
+					<button type="button" class="btn-console btn-speed switch" id="button-fast"> >>> </button>
 				</div>
 
 			</div>
@@ -203,8 +204,8 @@
 
 					{% for pattern in still_lifes %}
 					<figure>
-						 <div class="pattern-wrapper" draggable="">
-							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}</figcaption>
@@ -218,8 +219,8 @@
 
 					{% for pattern in oscillators %}
 					<figure>
-						 <div class="pattern-wrapper" draggable="">
-							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}<br><small>(period {{ pattern.period }})</small></figcaption>
@@ -239,8 +240,8 @@
 
 					{% for pattern in spaceships %}
 					<figure>
-						 <div class="pattern-wrapper" draggable="">
-							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}</figcaption>
@@ -254,8 +255,8 @@
 
 					{% for pattern in infinite_growth %}
 					<figure>
-						 <div class="pattern-wrapper" draggable="">
-							<img id="pattern-{{ pattern.name }}" class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}</figcaption>

@@ -1,60 +1,36 @@
 from random import randint
-from .models import Pattern
+# from .models import Pattern
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-
-
-
-class Patterns():
-	pattern_dict = {
-
-		# Still Lifes
-		'block' : [[0, 0, 0, 0], [0, 1, 1, 0], [0, 1, 1, 0], [0, 0, 0, 0]],
-		'beehive' : [[0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0], [0, 1, 0, 0, 1, 0], [0, 0, 1, 1, 0, 0], [0, 0, 0, 0, 0, 0]],
-		'flower' : [[0, 0, 0, 0, 0], [0, 0, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0 , 0], [0, 0, 0, 0, 0]],
-		'loaf' : [[0, 0, 0, 0, 0, 0], [0, 0, 1, 1, 0, 0], [0, 1, 0, 0, 1, 0], [0, 0, 1, 0, 1, 0], [0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0]],
-		'boat' : [[0, 0, 0, 0, 0], [0, 1, 1, 0, 0], [0, 1, 0, 1, 0], [0, 0, 1, 0, 0], [0, 0, 0, 0, 0]],
-
-		# Oscillators
-		'blinker': [[0, 0, 0, 0, 0], [0, 0, 0, 0, 0], [0, 1, 1, 1, 0], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]],
-	}
-
-	def __init__(self):
-		pass
-
-	def get_pattern(self, pattern):
-
-		if pattern in Patterns.pattern_dict:
-			print('ok')
-
-		try:
-			return Patterns.pattern_dict[pattern]
-		except KeyError:
-			raise
-
-
+from collections import Counter
 
 
 class Grid():
-
-	patterns = Patterns()
-
 	def __init__(self, rows=10, cols=10):
-		self.grid = self.make_grid(rows, cols)
+
 		self.rows = rows
 		self.cols = cols
+		self.moore_total = []
+		self.grid = []
+		self.next = []
+		self.make_grids(rows, cols)
 
 
 
-	def make_grid(self, rows, cols):
-		grid = []
+	def make_grids(self, rows, cols):
 		self.rows = rows
 		self.cols = cols
 		for i in range(self.rows):
-			grid.append([])
+			self.grid.append([])
+			self.next.append([])
+			self.moore_total.append([])
 			for j in range(self.cols):
-				grid[i].append(0)
-		return grid
+				self.grid[i].append(0)
+				self.next[i].append(0)
+				self.moore_total[i].append(0)
+			# return grid
+
+
 
 	def generations(self):
 		pass
@@ -65,44 +41,103 @@ class Grid():
 
 
 
-	def give_life(self):
+	def random(self):
+		self.clear()
 		for i in range(self.rows):
 			for j in range(self.cols):
-				if randint(0,1):
+				if randint(0, 1):
 					self.grid[i][j] = 1
 
 	# Step through another generations
-	def apply_rules(self, row, col):
-		moore_total = 0
+	def step(self):
 
-		for i in range(row - 1, row + 2):
-			for j in range(col - 1, col + 2):
-				#print((i, j))
-				if i >= 0 and j >= 0 and i < self.rows and j < self.cols and ((i,j) != (row, col)):
-					#print((i, j))
-					moore_total += self.grid[i][j]
-					#print(self.moore_total)
+		# moore_total = []
+
+		for row in range(self.rows):
+			# moore_total.append([])
+			for col in range(self.cols):
+
+				if self.grid[row][col]:
+
+					moore_neighborhood = [
+						(row - 1, col - 1),
+						(row - 1, col),
+						(row - 1, col + 1),
+						(row, col - 1),
+						(row, col + 1),
+						(row + 1, col - 1),
+						(row + 1, col),
+						(row + 1, col + 1),
+					]
+
+					for r, c in moore_neighborhood:
+						if self.rows > r >= 0 and self.cols > c >= 0:
+							self.moore_total[r][c] += 1
+
+						# for r in range(row - 1, row + 2):
+						# 	for c in range(col - 1, col + 2):
+						# 		if self.rows > r >= 0 and self.cols > c >= 0 and (r == row and c == col):
+
+		#print(self.moore_total)
+
+		for row in range(self.rows):
+			for col in range(self.cols):
+				moore_total = self.moore_total[row][col]
+				self.moore_total[row][col] = 0
+
+				# if cell is alive
+				if self.grid[row][col]:
+
+					if moore_total < 2:
+						self.grid[row][col] = 0
+					elif moore_total == 2 or moore_total == 3:
+						self.grid[row][col] = 1
+					elif moore_total >= 4:
+						self.grid[row][col] = 0
+
+				# if cell is dead
+				else:
+					if moore_total == 3:
+						self.grid[row][col] = 1
+
+					# self.grid = self.next
+					# self.next = self.moore_total
 
 
-		# Populate the new grid according to the rules
 
-		# if cell is alive
-		if self.grid[row][col]:
-			if moore_total < 2:
-				self.next[row][col] = 0
-			elif moore_total == 2 or moore_total == 3:
-				self.next[row][col] = 1
-			elif moore_total >= 4:
-				self.next[row][col] = 0
-		# if cell is dead
-		else:
-			if moore_total == 3:
-				self.next[row][col] = 1
-
-
+					# coord = { 'row': row - self.cols, 'col': col - 1 }
+					# if (coord['row'] >= 0 and coord['row'] < grid.rows and coord['col'] >= 0 and coord['col'] < grid.cols):
+					# 	pass
+					#
+					# moore_total += self.grid[row - self.cols][col - 1]
+					# moore_total += self.grid[row - self.cols][col]
+					# moore_total += self.grid[row - self.cols][col + 1]
+					# moore_total += self.grid[row][col - 1]
+					# moore_total += self.grid[row][col]
+					# moore_total += self.grid[row][col + 1]
+					# moore_total += self.grid[row + self.cols][col - 1]
+					# moore_total += self.grid[row + self.cols][col]
+					# moore_total += self.grid[row + self.cols][col + 1]
 
 
-	def gen_step(self):
+					# for i in range(row - 1, row + 2):
+					# 	for j in range(col - 1, col + 2):
+					# 		#print((i, j))
+					# 		if i >= 0 and j >= 0 and i < self.rows and j < self.cols and ((i,j) != (row, col)):
+					# 			#print((i, j))
+					# 			moore_total += self.grid[i][j]
+					# 			#print(self.moore_total)
+					#
+					#
+					# # Populate the new grid according to the rules
+					#
+					# # if cell is alive
+					#
+
+
+
+	def step2(self):
+		print('step function')
 		# Make a new grid
 		self.gen_make()
 
@@ -111,25 +146,37 @@ class Grid():
 			for j in range(self.cols):
 				self.apply_rules(i, j)
 
-		# Replace grid
-		self.grid = self.next
+			# Replace grid
 
 
-	def add_pattern(self, row, col, pattern):
-		#pattern_matrix = Grid.patterns.get_pattern(pattern)
-		pattern_matrix = Pattern.objects.get(name=pattern)
-		print(pattern_matrix.grid)
-		pattern_matrix = json.JSONDecoder().decode(pattern_matrix.grid)
 
+	# def add_pattern(self, row, col, pattern):
+	#
+	# 	pattern_matrix = Pattern.objects.get(name=pattern)
+	# 	print(pattern_matrix.grid)
+	# 	pattern_matrix = json.JSONDecoder().decode(pattern_matrix.grid)
+	#
+	#
+	# 	print('(rows, col)' + str((self.rows, self.cols)))
+	#
+	# 	for i in range(len(pattern_matrix)):
+	# 		for j in range(len(pattern_matrix[0])):
+	# 			self.grid[row + i][col + j] = pattern_matrix[i][j]
+	#
+	# 	return
 
-		print('(rows, col)' + str((self.rows, self.cols)))
+	def activate_cells(self, new_cells):
 
-		for i in range(len(pattern_matrix)):
-			for j in range(len(pattern_matrix[0])):
-				self.grid[row + i][col + j] = pattern_matrix[i][j]
+		# print(new_cells)
 
-		return
+		for el in new_cells:
+			# print(el)
+			self.grid[el['row']][el['col']] = 1
 
+	def clear(self):
+		for i in range(self.rows):
+			for j in range(self.cols):
+				self.grid[i][j] = 0
 
 
 	def __str__(self):
@@ -151,41 +198,31 @@ class Grid():
     4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
 '''
 
-def start(grid=None):
+# def start(grid=None):
+#
+# 	global myGrid
+#
+# 	if grid is None:
+# 		grid = Grid(10, 5)
+# 		# Randomize grid
+# 		myGrid = grid
+# 		grid.random()
+#
+# 	myGrid = grid
+# 	return myGrid
 
-	global myGrid
 
-	if grid is None:
-		grid = Grid(10, 5)
-		# Randomize grid
-		myGrid = grid
-		grid.give_life()
-
-	myGrid = grid
-	return myGrid
-
-def step(grid):
-
-	# Apply rules to a generation
-	grid.gen_step()
-	return grid
-
-def jsonify(grid=None):
-
-	if grid is None:
-		raise BaseException
-
-	#return DjangoJSONEncoder().encode(grid.grid)
-
-#grid = Grid()
-
-start()
-
+myGrid = Grid(5, 5)
+myGrid.random()
 print(myGrid)
-step(myGrid)
-#jsonify(myGrid)
+myGrid.step()
+myGrid.step()
+myGrid.step()
+print(myGrid)
 
-#myGrid.add_pattern(10, 5, 'block')
+# jsonify(myGrid)
+
+# myGrid.add_pattern(10, 5, 'block')
 
 exploder = Grid()
 exploder.grid[5][5] = 1
@@ -197,16 +234,4 @@ exploder.grid[7][6] = 1
 exploder.grid[8][5] = 1
 
 
-#print((i,j) == (29, 27))
-
-
-
-
-
-
-
-
-
-
-
-
+# print((i,j) == (29, 27))

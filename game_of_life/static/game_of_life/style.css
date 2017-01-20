@@ -148,6 +148,7 @@ Section - Simulation
     background-color: white;
     color: black;
     border: none;
+    border-radius: 10px;
 
 }
 
@@ -158,11 +159,26 @@ Section - Simulation
 
 
 
-.btn-console:active {
+.btn-console.is-pointer-down {
     color: #04ce92;
-  transform: translateY(5px);
-  box-shadow: 3px 3px 8px #888;
+    transform: translateY(5px);
+    box-shadow: 3px 3px 8px #888;
 }
+
+.btn-console.switched-on {
+    color: #04ce92;
+    transform: translateY(5px);
+    box-shadow: 3px 3px 8px #888;
+}
+
+
+.btn-speed {
+    height: 40px;
+    width: 65px;
+    /* border-radius: 10px; */
+    font-size: 15px;
+}
+
 
 
 #section-simulation {
@@ -221,7 +237,7 @@ Section - Simulation
     -ms-user-select: none;
 }
 
-#section-simulation img.pattern-overlay.dragging {
+#section-simulation .is-dragging img.pattern-overlay {
     opacity: .75;
     box-shadow: 0 0 7px rgb(6, 214, 160);
     border: 1px solid rgb(6, 214, 160);
@@ -231,10 +247,6 @@ Section - Simulation
 #section-simulation figure div.pattern-wrapper.in-bounds {
     background-color: #06D6A0;
     opacity: .75;
-}
-
-#section-simulation figure div.pattern-wrapper.slow-transition {
-    transition: transform 1s;
 }
 
 
