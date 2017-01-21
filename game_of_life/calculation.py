@@ -1,9 +1,10 @@
 from random import randint
-# from .models import Pattern
+from .models import Pattern
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from collections import Counter
-
+import copy
+import time
 
 class Grid():
 	def __init__(self, rows=10, cols=10):
@@ -14,6 +15,7 @@ class Grid():
 		self.grid = []
 		self.next = []
 		self.make_grids(rows, cols)
+		self.predictions = []
 
 
 
@@ -47,6 +49,7 @@ class Grid():
 			for j in range(self.cols):
 				if randint(0, 1):
 					self.grid[i][j] = 1
+
 
 	# Step through another generations
 	def step(self):
@@ -100,70 +103,32 @@ class Grid():
 					if moore_total == 3:
 						self.grid[row][col] = 1
 
-					# self.grid = self.next
-					# self.next = self.moore_total
+
+	def predict(self, num=10):
+		del(self.predictions)
+		self.predictions = []
+		for i in range(num):
+			#newList = list(self.grid)
+			self.predictions.append(copy.deepcopy(self.grid))
+			#self.predictions.append(self.grid)
+			self.step()
 
 
+	def add_pattern(self, row, col, pattern):
 
-					# coord = { 'row': row - self.cols, 'col': col - 1 }
-					# if (coord['row'] >= 0 and coord['row'] < grid.rows and coord['col'] >= 0 and coord['col'] < grid.cols):
-					# 	pass
-					#
-					# moore_total += self.grid[row - self.cols][col - 1]
-					# moore_total += self.grid[row - self.cols][col]
-					# moore_total += self.grid[row - self.cols][col + 1]
-					# moore_total += self.grid[row][col - 1]
-					# moore_total += self.grid[row][col]
-					# moore_total += self.grid[row][col + 1]
-					# moore_total += self.grid[row + self.cols][col - 1]
-					# moore_total += self.grid[row + self.cols][col]
-					# moore_total += self.grid[row + self.cols][col + 1]
+		pattern_matrix = Pattern.objects.get(name=pattern)
+		print(pattern_matrix.grid)
+		pattern_matrix = json.JSONDecoder().decode(pattern_matrix.grid)
 
 
-					# for i in range(row - 1, row + 2):
-					# 	for j in range(col - 1, col + 2):
-					# 		#print((i, j))
-					# 		if i >= 0 and j >= 0 and i < self.rows and j < self.cols and ((i,j) != (row, col)):
-					# 			#print((i, j))
-					# 			moore_total += self.grid[i][j]
-					# 			#print(self.moore_total)
-					#
-					#
-					# # Populate the new grid according to the rules
-					#
-					# # if cell is alive
-					#
+		print('(rows, col)' + str((self.rows, self.cols)))
 
+		for i in range(len(pattern_matrix)):
+			for j in range(len(pattern_matrix[0])):
+				self.grid[row + i][col + j] = pattern_matrix[i][j]
 
+		return
 
-	def step2(self):
-		print('step function')
-		# Make a new grid
-		self.gen_make()
-
-		# Apply rules to each cell in grid
-		for i in range(self.rows):
-			for j in range(self.cols):
-				self.apply_rules(i, j)
-
-			# Replace grid
-
-
-
-	# def add_pattern(self, row, col, pattern):
-	#
-	# 	pattern_matrix = Pattern.objects.get(name=pattern)
-	# 	print(pattern_matrix.grid)
-	# 	pattern_matrix = json.JSONDecoder().decode(pattern_matrix.grid)
-	#
-	#
-	# 	print('(rows, col)' + str((self.rows, self.cols)))
-	#
-	# 	for i in range(len(pattern_matrix)):
-	# 		for j in range(len(pattern_matrix[0])):
-	# 			self.grid[row + i][col + j] = pattern_matrix[i][j]
-	#
-	# 	return
 
 	def activate_cells(self, new_cells):
 
@@ -184,6 +149,17 @@ class Grid():
 		for i in range(len(self.grid)):
 			self.grid_str += str(self.grid[i]) + '\n'
 		return self.grid_str
+
+
+	def str_predictions(self):
+		self.pred_str = ''
+		for i in range(len(self.predictions)):
+			predict = self.predictions[i]
+			for j in range(len(predict)):
+				self.pred_str += '     ' + str(predict[j]) + '\n'
+			self.pred_str += '(' + str(id(predict)) + ')' + '------------------------------' + '\n'
+		return self.pred_str
+
 
 
 
@@ -212,13 +188,14 @@ class Grid():
 # 	return myGrid
 
 
-myGrid = Grid(5, 5)
+myGrid = Grid(50, 75)
 myGrid.random()
 print(myGrid)
-myGrid.step()
-myGrid.step()
-myGrid.step()
-print(myGrid)
+startTime = time.time()
+myGrid.predict()
+endTime = time.time()
+print(myGrid.str_predictions())
+print('Prediciton Time: ' + str(endTime - startTime))
 
 # jsonify(myGrid)
 

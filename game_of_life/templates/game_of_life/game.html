@@ -56,7 +56,8 @@
 	<!-- Custom Scripts -->
 	<link rel="stylesheet" href="{% static 'game_of_life/style.css' %}" />
 	<script src="{% static 'game_of_life/script.js' %}"></script>
-
+	<script src="{% static 'game_of_life/simulation.js' %}"></script>
+	<script src="{% static 'game_of_life/apply-draggabilly.js' %}"></script>
 	<style>
 
 
@@ -171,7 +172,10 @@
 
 			<div class="row">
 				<div class="col-md-8">
-					<canvas id="grid"></canvas>
+					<div class="canvas-wrapper">
+						<div class="loader-wrapper"><img class="loader" src="{% static 'game_of_life/images/loader_2.gif' %}" alt="" draggable="false"></div>
+						<canvas id="grid"></canvas>
+					</div>
 				</div>
 
 				<div class='col-md-4'>
