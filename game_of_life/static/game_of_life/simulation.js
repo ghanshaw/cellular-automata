@@ -13,16 +13,18 @@ var Simulation = function() {
 
 
     // Infra red
-    ctx.fillStyle = "#ef476f";
+    //ctx.fillStyle = "#ef476f";
 
     // Orange-Yellow
-    ctx.fillStyle = "#FFD166";
+    //ctx.fillStyle = "#FFD166";
 
     // Carribean Green
     ctx.fillStyle = "#06D6A0";
 
     // Slategrey
     //ctx.fillStyle = "slategrey";
+
+    ctx.strokeStyle = '#ddd';
 
 
     ctx.beginPath();
@@ -40,39 +42,77 @@ var Simulation = function() {
 
     obj.simSpeed = 'slow';
     obj.predictions = [];
-    obj.isRunning = false;
-    obj.population = 100;
-    obj.isPredicting = false;
 
-    // Define methods
+    obj.isOn = false;
+    obj.isPredicting = false;
+    obj.isFrozen = false;
+
+    obj.pop = 0;
+    obj.year = 0;
+
+
+
+    // Drawing methods
     obj.drawRowsCols = drawRowsCols;
     obj.drawGrid = drawGrid;
-    obj.clearCanvas = clearCanvas;
-    obj.clearGrid = clearGrid;
+    obj.eraseCanvas = eraseCanvas;
+
+    // Simulation controls
     obj.startSimulation = startSimulation;
+    obj.stepSimulation = stepSimulation;
+    obj.runSimulation = runSimulation;
+    obj.stopSimulation = stopSimulation;
+    obj.clearSimulation = clearSimulation;
+
+
+
     obj.addPattern = addPattern;
     obj.getRowCol = getRowCol;
     obj.toggleCell = toggleCell;
     obj.activateCells = activateCells;
-    obj.stepSimulation = stepSimulation;
-    obj.runSimulation = runSimulation;
-    obj.stopSimulation = stopSimulation;
+
+
+
     obj.bindConsoleButtons = bindConsoleButtons;
 
     obj.addPredictions = addPredictions;
     obj.createWebSocket = createWebSocket;
     obj.sendData = sendData
     obj.awaitPredictions = awaitPredictions;
+    obj.updateStats = updateStats;
 
-    obj.predictionRefresh = 10;
+    obj.predictionRefresh = 15;
 
-    obj.simIntervals = {
+    obj.simSpeeds = {
         'slow': 200,
         'medium': 100,
         'fast': 50
     }
 
     return obj;
+
+}
+
+restartConnection  = function() {
+
+    // Freeze simulation
+
+    this.socket = createWebSocket();
+
+    // Proceed when WebSocket finishes opening
+    this.socket.addEventListener('open', function(event){
+
+        // Send data to websocket
+        message_data =  {
+            'cols':  sim.gridCols,
+            'rows': sim.gridRows,
+            'serverCommand': 'resumeGrid',
+            'clientCommand': 'drawGrid'
+        }
+
+        sim.sendData(message_data);
+
+    })
 
 }
 
@@ -86,6 +126,12 @@ var createWebSocket = function() {
 
     socket.onopen = function() {};
 
+    socket.onclose = function() {
+
+        simulation.restartConnection();
+
+    };
+
 
     socket.onmessage = function(e) {
 
@@ -94,37 +140,60 @@ var createWebSocket = function() {
         console.log('WebSocket Time: ' + (onmessage_time - send_time) + 'ms');
 
         parseStart = new Date();
-        socket.type = $.parseJSON(e.data)['type'];
-        socket.grid = $.parseJSON(e.data)['grid'];
-        socket.command = $.parseJSON(e.data)['command'];
+        var message = $.parseJSON(e.data);
         parseEnd = new Date();
 
         console.log('Parsed Time: ' + (parseEnd - parseStart) + 'ms');
         //draw();
 
-        if (socket.type == 'prediction') {
+        if (message.content == 'predictions') {
 
             // Load predictions from socket into simulation
-            simulation.addPredictions(socket.grid);
+            simulation.addPredictions(message.predictions);
 
             // Indicate that client is done retrieving predictions
             simulation.isPredicting = false;
 
         }
 
-        if (socket.command == 'drawGrid') {
+        else if (message.content == 'generation') {
+
+            // Load single generation into predictions queue
+            simulation.addPredictions([message.generation])
+
+        }
+
+        if (message.clientCommand == 'drawGrid') {
 
             // Retrieve next prediction
-            simulation.grid = simulation.predictions.pop()
+            var generation = simulation.predictions.pop();
+            simulation.grid = generation['grid'];
+            simulation.pop = generation['pop'];
+            simulation.year = generation['year'];
 
             // Draw grid
             simulation.drawGrid();
+
+            // Update statistics
+            simulation.updateStats()
+        }
+
+        if (message.clientCommand == 'eraseCanvas') {
+
+            // Apply empty generation
+            simulation.grid = message.generation['grid'];
+            simulation.pop = message.generation['pop'];
+            simulation.year = message.generation['year'];
+
+
+            // Draw grid
+            simulation.drawGrid();
+
         }
 
      }
 
      return socket;
-
 
 }
 
@@ -148,19 +217,34 @@ var addPredictions = function(predictions) {
 //*************************************************//
 var bindConsoleButtons = function() {
 
+     /*
+     Create draggabilly buttons for each console button
+     Use draggabilly to exploit 'is-pointing' class,
+     ensure consistent behavior on mobile and desktop and
+     avoid use of ':active' psuedo-class
+     */
 
-    $('#button-step').click(function() {
+
+    // Create draggabilly step button
+    $btnStep = $('#button-step').draggabilly({});
+    $btnStep.draggabilly('disable');
+
+    $btnStep.on('staticClick', function() {
 
         simulation.stepSimulation();
 
     })
 
-    $('#button-run').click(function() {
+    // Create draggabilly run button
+    $btnRun = $('#button-run').draggabilly({});
+    $btnRun.draggabilly('disable');
+
+    $btnRun.on('staticClick', function() {
 
         $this = $(this)
 
         // If button is not switched on
-        if (!$this.hasClass('switched-on')) {
+        if (!$this.hasClass('switched-on') && simulation.pop > 0) {
 
             // Style button
             $this.addClass('switched-on');
@@ -177,45 +261,91 @@ var bindConsoleButtons = function() {
             $this.removeClass('switched-on');
             $this.text('Run');
 
-            // Stop simulation
             simulation.stopSimulation();
 
-        }
+            // Stop simulation
+            // If simulation is running
+            if (simulation.isRunning) {
+                alert("Simulation isn't running");
+            }
 
-    })
-
-    $('.btn-speed').click(function(event) {
-
-        // Update the simulation speed
-        simulation.stopSimulation();
-        simulation.simSpeed = event.target.id.split[1];
-
-        if ($(this).hasClass('switched-on')) {
-            simulation.runSimulation();
         }
 
     })
 
 
-    $('#button-random').click(function() {
+    // Create draggabilly random button
+    $btnRandom = $('#button-random').draggabilly({});
+    $btnRandom.draggabilly('disable');
+
+    $btnRandom.on('staticClick', function() {
 
         message_data = { 'command': 'random' };
         socket.send(JSON.stringify(message_data));
 
     })
 
+    // Create draggabilly clear button
+    $btnClear = $('#button-clear').draggabilly({});
+    $btnClear.draggabilly('disable');
 
-    $('#button-clear').click(function() {
+    $btnClear.on('staticClick', function() {
 
-        console.log('clearing')
+        // Style button
+        $('#button-run').removeClass('switched-on');
+        $('#button-run').text('Run');
 
-        message_data = { 'command': 'clear' };
-        socket.send(JSON.stringify(message_data));
+        // Clear simulation
+        simulation.clearSimulation();
 
 
     })
-}
 
+
+    // Create draggabilly speed buttons
+    speedButtons = document.getElementsByClassName('btn-speed');
+    $btnSpeedArray = [];
+
+    for (var i = 0; i < speedButtons.length; i++) {
+
+        // Initialize a speed button
+        $btnSpeed = $('.btn-speed').draggabilly({});
+        $btnSpeed.draggabilly('disable');
+
+        // Add static click behavior
+        $btnSpeed.on('staticClick', function(event) {
+
+            $this = $(this)
+            console.log($this)
+
+            // If button isn't switched on
+            if (!$this.hasClass('switched-on')) {
+
+                // Style buttons
+                $('.btn-speed').removeClass('switched-on');
+                $this.addClass('switched-on');
+
+                // Update the simulation speed
+                simulation.simSpeed = this.id.split('-')[1];
+
+                // If simulation is running
+                if (simulation.isRunning) {
+
+                    // Restart simulation
+                    simulation.stopSimulation();
+                    simulation.runSimulation();
+                }
+
+            }
+
+        });
+
+        // Append array of speed buttons
+        $btnSpeedArray.push($btnSpeed);
+
+    }
+
+}
 
 
 //*************************************************//
@@ -227,6 +357,11 @@ var sendData = function(message_data) {
     this.socket.send(JSON.stringify(message_data));
 
 }
+
+
+/*--------------------------------------------------------*/
+// Simulation Controls
+/*--------------------------------------------------------*/
 
 
 //*************************************************//
@@ -244,8 +379,6 @@ var sendData = function(message_data) {
 
     // Create canvas background
     this.background = this.drawRowsCols();
-
-    this.drawRowsCols();
 
     // Select initial server speed
     $('#button-' + this.simSpeed).addClass('switched-on');
@@ -271,40 +404,6 @@ var sendData = function(message_data) {
 
 
 //*************************************************//
-// Computes row and col with x, y coordinates
-// (from top, left origin)
-//*************************************************//
-var getRowCol = function(x, y) {
-
-    row = Math.floor(y / this.cellWidth);
-    col = Math.floor(x / this.cellHeight);
-
-    return { row: row, col: col };
-
-}
-
-
-//*************************************************//
-// Add chosen pattern to simulation canvas
-//*************************************************//
-var addPattern = function(x, y, pattern) {
-
-    var coord = this.getRowCol(x, y);
-
-    // Send pattern to websocket
-    message_data =  {
-        row: coord.row,
-        col: coord.col,
-        pattern: pattern,
-        command: 'addPattern',
-    }
-
-    this.sendData(message_data);
-
-}
-
-
-//*************************************************//
 // Update canvas one generation
 //*************************************************//
 var stepSimulation = function() {
@@ -315,7 +414,7 @@ var stepSimulation = function() {
     //if (this.isRunning) { return; }
 
     // If grid is empty, do nothing
-    if (this.population == 0) { return; }
+    if (this.pop == 0) { return; }
 
     // If no predictions are available, wait for new ones to come from server
     else if (this.predictions.length == 0) {
@@ -323,19 +422,27 @@ var stepSimulation = function() {
         return;
     }
 
-    // Retrieve next prediction
-    this.grid = this.predictions.pop()
+    // Retrieve next generation from prediction
+    var generation = this.predictions.pop()
+    this.grid = generation['grid'];
+    this.pop = generation['pop'];
+    this.year = generation['year'];
 
     // Draw grid
     this.drawGrid();
 
+    // Update statistics
+    simulation.updateStats()
+
     // If prediction buffer is too low, add predictions
     if (this.predictions.length <= this.predictionRefresh && !this.isPredicting) {
 
-        // Indicate that client is retrieving more predicitons
+        console.log('Get predictions!');
+
+        // Indicate that client is retrieving more predictions
         this.isPredicting = true
 
-        // Send data to websocket
+        // Send data to WebSocket
         message_data =  {
             'serverCommand': 'predict',
             'clientCommand': ''
@@ -351,49 +458,6 @@ var stepSimulation = function() {
 
 }
 
-//*************************************************//
-// Load wait screen, disable button, while awaiting predictions
-//*************************************************//
-var awaitPredictions = function() {
-
-    // Flag to indicate if simulation is paused
-    var simPaused = false;
-
-    // If simulation is running, stop
-    if (this.isRunning) {
-        this.stopSimulation();
-        simPaused = true;
-    }
-
-    // Show loading screen
-    $('.loader-wrapper').css('display', 'flex');
-
-    // Store 'this' (to pass to setInterval)
-    var that = this;
-
-    // Create a setInterval that run while predictions are being generated
-    var waitInterval = setInterval(function() {
-
-        if (that.predictions.length > 0) {
-
-            // Deactivate setInterval
-            clearInterval(waitInterval);
-
-            // Hide loader
-            $('.loader-wrapper').css('display', 'none');
-
-            // If simulation is paused, resume simulation
-            if (simPaused) {
-                that.runSimulation();
-            }
-        }
-
-    }, 20);
-
-
-
-
-}
 
 //*************************************************//
 // Update simulation at regular intervals
@@ -404,12 +468,12 @@ var runSimulation = function() {
 
     that = this;
 
-    var interval = this.simIntervals[this.simSpeed];
+    var interval = this.simSpeeds[this.simSpeed];
     this.simInterval = setInterval(function() {
 
         return that.stepSimulation();
 
-    }, 20);
+    }, interval);
 
 }
 
@@ -424,20 +488,32 @@ var stopSimulation = function() {
 }
 
 
-//*************************************************//
-// Make cells highlighted by user active
-//*************************************************//
-var activateCells = function(newCells) {
 
+//*************************************************//
+// Clear simulation canvas
+//*************************************************//
+var clearSimulation = function() {
+
+    // If simulation is running, stop
+    if (this.isRunning) {
+        this.stopSimulation();
+    }
+
+    // Clear predictions
+    this.predictions = [];
 
     message_data =  {
-        newCells: newCells,
-        command: 'activateCells',
+        'serverCommand': 'clear',
+        'clientCommand': 'drawGrid',
     }
 
     this.sendData(message_data);
-
 }
+
+
+/*--------------------------------------------------------*/
+// Drawing Methods
+/*--------------------------------------------------------*/
 
 
 //*************************************************//
@@ -490,10 +566,10 @@ var drawGrid = function() {
     var drawStart = performance.now();
 
     // Clear canvas
-    this.clearCanvas();
+    this.eraseCanvas();
 
     // Carribean Green
-    this.ctx.fillStyle = "#06D6A0";
+    //this.ctx.fillStyle = "#06D6A0";
 
     // Draw the grid (row, col)
     for (var row = 0; row < this.gridRows; row++) {
@@ -517,7 +593,7 @@ var drawGrid = function() {
 //*************************************************//
 // Clear simulation canvas
 //*************************************************//
-var clearCanvas = function() {
+var eraseCanvas = function() {
 
     self.ctx.clearRect(0, 0, this.ctxWidth, this.ctxHeight);
 
@@ -527,21 +603,38 @@ var clearCanvas = function() {
 
 
 //*************************************************//
-// Clear simulation canvas
+// Make cells highlighted by user active
 //*************************************************//
-var clearGrid = function() {
+var activateCells = function(newCells) {
 
+    // Empty out predictions
+    this.predictions = [];
 
-    //self.ctx.clearRect(0, 0, this.ctxWidth, this.ctxHeight);
-
+    // Await predictions
+    this.awaitPredictions();
 
     message_data =  {
+        serverCommand: 'activateCells',
+        clientCommand: 'drawGrid',
         newCells: newCells,
-        command: 'clearGrid',
+        year: this.year
     }
 
     this.sendData(message_data);
+
 }
+
+
+
+
+var updateStats = function() {
+
+    $('#console-pop').text(this.pop);
+    $('#console-gen').text(this.year);
+
+}
+
+
 
 
 //*************************************************//
@@ -550,13 +643,109 @@ var clearGrid = function() {
 var toggleCell = function(row, col, turnOn) {
 
     if (turnOn) {
-        this.ctx.fillStyle = "#06D6A0";
+        //this.ctx.fillStyle = "#06D6A0";
         this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
         this.ctx.strokeRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
     } else {
         this.ctx.fillStyle = "white";
         this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
     }
+
+
+}
+
+
+
+
+//*************************************************//
+// Computes row and col with x, y coordinates
+// (from top, left origin)
+//*************************************************//
+var getRowCol = function(x, y) {
+
+    row = Math.floor(y / this.cellWidth);
+    col = Math.floor(x / this.cellHeight);
+
+    return { row: row, col: col };
+
+}
+
+
+//*************************************************//
+// Add chosen pattern to simulation canvas
+//*************************************************//
+var addPattern = function(x, y, pattern) {
+
+    // Empty out predictions
+    this.predictions = [];
+
+    // Await predictions
+    this.awaitPredictions()
+
+    // Compute coordinates of placed pattern
+    var coord = this.getRowCol(x, y);
+
+    // Send pattern to websocket
+    message_data =  {
+        row: coord.row,
+        col: coord.col,
+        pattern: pattern,
+        year: this.year,
+        serverCommand: 'addPattern',
+        clientCommand: 'drawGrid'
+    }
+
+    this.sendData(message_data);
+
+
+}
+
+
+//*************************************************//
+// Load wait screen, disable button, while awaiting predictions
+//*************************************************//
+var awaitPredictions = function() {
+
+    // Flag to indicate if simulation is paused
+    //var simPaused = false;
+
+
+    // If simulation is on (and isn't frozen), freeze it
+    if (this.isRunning) {
+        this.stopSimulation();
+        this.isFrozen = true;
+    }
+
+    // Show loading screen
+    $('.loader-wrapper').css('display', 'flex');
+
+    // Stop console functionality
+
+
+    // Store 'this' (to pass to setInterval)
+    var that = this;
+
+    // Create a setInterval that run while predictions are being generated
+    this.simInterval = setInterval(function() {
+
+        if (that.predictions.length > 0) {
+
+            // Deactivate setInterval
+            clearInterval(this.simInterval);
+
+            // Hide loader
+            $('.loader-wrapper').css('display', 'none');
+
+            // If simulation is frozen, unfreeze and run
+            if (that.isFrozen) {
+                that.isFrozen = false;
+                that.runSimulation();
+            }
+        }
+
+    }, 20);
+
+
 
 
 }

@@ -7,48 +7,6 @@ function applyDraggabilly (simulation){
 
 
     //---------------------------------------------------//
-    // Implement plugin for console buttons
-    // Enables console button functionality
-    //---------------------------------------------------//
-
-
-
-    var consoleButtons = document.getElementsByClassName('btn-console');
-    var $draggieConsoleButtons = [];
-
-
-
-    for (var i = 0; i < consoleButtons.length; i++) {
-
-        var $draggieConsoleButton = $(consoleButtons[i]).draggabilly({});
-        $draggieConsoleButton.draggabilly('disable');
-
-        // If console button is speed button, add additional event listeners
-        if ($draggieConsoleButton.hasClass('btn-speed')) {
-
-            // Add additional static click event to speed buttons
-            $draggieConsoleButton.on('staticClick', function(event, pointer) {
-
-                $speedButton = $(event.target);
-
-                // If the speed button is inactive, then
-                // remove styling from other buttons and
-                // add styling to that button
-                if (!$speedButton.hasClass('switched-on')) {
-
-                    $('.btn-speed').removeClass('switched-on');
-                    $speedButton.addClass('switched-on');
-
-                }
-            })
-
-        }
-
-        $draggieConsoleButtons.push($draggieConsoleButton);
-    }
-
-
-    //---------------------------------------------------//
     // Implement plugin for simulation canvas
     // Enables cell highlighting
     //---------------------------------------------------//
@@ -60,6 +18,19 @@ function applyDraggabilly (simulation){
     $draggieGrid.newCells = [];
     $draggieGrid.setCells = new Set();
 
+
+    $draggieGrid.on('pointerDown', function(event, pointer) {
+
+        // Flag to indicate if simulation is paused
+        $draggieGrid.simPaused = false;
+
+        // If simulation is running, stop
+        if (simulation.isRunning) {
+            simulation.stopSimulation();
+            $draggieGrid.simPaused = true;
+        }
+
+    })
 
     $draggieGrid.on('pointerMove', function(event, pointer) {
 
@@ -88,10 +59,15 @@ function applyDraggabilly (simulation){
 
     $draggieGrid.on('pointerUp', function(event, pointer) {
 
-
+        // Send cell update to server
         simulation.activateCells($draggieGrid.newCells);
         $draggieGrid.setCells.clear();
         $draggieGrid.newCells = [];
+
+         // If simulation is paused, resume simulation
+        if ($draggieGrid.simPaused) {
+            simulation.runSimulation();
+        }
 
     })
 
@@ -120,11 +96,9 @@ function applyDraggabilly (simulation){
             }, 500)
 
 
-
             var draggieData = $draggiePattern.data('draggabilly');
-            //console.log(draggieData);
 
-            // Check the pattern is within bounds of board
+            $draggiePattern.simPaused = false;
 
         })
 
@@ -144,11 +118,37 @@ function applyDraggabilly (simulation){
 
             if (patternEdges.inBounds(gridEdges)) {
 
+                // If simulation is running and not paused, puase it
+                if (simulation.isRunning && !$draggiePattern.simPaused) {
+
+                    // Stop simulation
+                    simulation.stopSimulation();
+
+                    // Indicate that simulation is paused
+                    $draggiePattern.simPaused = true;
+
+                }
+
+
+                // Style pattern
                 console.log('inBounds');
                 $pattern.addClass('in-bounds');
                 $patternWrapper.addClass('in-bounds');
 
             } else {
+
+                // If simulation is running and is paused, unpause it
+                if (simulation.isRunning && $draggiePattern.simPaused) {
+
+                    // Run simulation
+                    simulation.runSimulation();
+
+                    // Indicate that simulation is not paused
+                    $draggiePattern.simPaused = false;
+
+                }
+
+                // Style pattern
                 $pattern.removeClass('in-bounds');
                 $patternWrapper.removeClass('in-bounds');
 
@@ -170,17 +170,12 @@ function applyDraggabilly (simulation){
             // Compute the x, y within grid
             if (patternEdges.inBounds(gridEdges)) {
 
-
                 // Remove styling, fade element and return it
                 $patternWrapper.fadeOut(500, function() {
                     $pattern.removeClass('in-bounds');
                     $patternWrapper.removeClass('in-bounds').css({ 'left': 0, 'top': 0 }).show();
 
                 });
-
-                // Put element back
-
-
 
                 // Compute row and column of pattern in grid
                 var y = gridEdges.top - patternEdges.top;
@@ -189,15 +184,19 @@ function applyDraggabilly (simulation){
                 x = Math.abs(x);
                 y = Math.abs(y);
 
-                console.log(patternName);
-
                 simulation.addPattern(x, y, patternName);
 
+                // If simulation is running and is paused, unpause it and resume
+                if ($draggiePattern.simPaused) {
 
-                console.log("Panend");
-                console.log([x, y]);
+                    // Indicate that simulation is not paused
+                    $draggiePattern.simPaused = false;
 
-                // Compute corresponding x,y within grid matrix
+                    // Resume simulation
+                    simulation.runSimulation();
+
+                }
+
             }
             // If pan ends and pattern is not within bounds
             else {

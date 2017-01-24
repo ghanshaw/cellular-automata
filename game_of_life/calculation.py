@@ -6,36 +6,37 @@ from collections import Counter
 import copy
 import time
 
-class Grid():
+class Conway():
 	def __init__(self, rows=10, cols=10):
 
 		self.rows = rows
 		self.cols = cols
+
+		# 2D array storing moore totals for each cell
 		self.moore_total = []
-		self.grid = []
-		self.next = []
-		self.make_grids(rows, cols)
+
+		# Generation dict stores 2D array of cells,
+		# generation year and population
+		self.generation = {
+			'grid': [],
+			'year': 0,
+			'pop': 0
+		}
+
 		self.predictions = []
+		self.make_generation(rows, cols)
 
 
-
-	def make_grids(self, rows, cols):
+	def make_generation(self, rows, cols):
 		self.rows = rows
 		self.cols = cols
 		for i in range(self.rows):
-			self.grid.append([])
-			self.next.append([])
+			self.generation['grid'].append([])
 			self.moore_total.append([])
 			for j in range(self.cols):
-				self.grid[i].append(0)
-				self.next[i].append(0)
+				self.generation['grid'][i].append(0)
 				self.moore_total[i].append(0)
-			# return grid
 
-
-
-	def generations(self):
-		pass
 
 
 	def gen_make(self):
@@ -48,7 +49,7 @@ class Grid():
 		for i in range(self.rows):
 			for j in range(self.cols):
 				if randint(0, 1):
-					self.grid[i][j] = 1
+					self.generation['grid'][i][j] = 1
 
 
 	# Step through another generations
@@ -60,7 +61,7 @@ class Grid():
 			# moore_total.append([])
 			for col in range(self.cols):
 
-				if self.grid[row][col]:
+				if self.generation['grid'][row][col]:
 
 					moore_neighborhood = [
 						(row - 1, col - 1),
@@ -77,11 +78,11 @@ class Grid():
 						if self.rows > r >= 0 and self.cols > c >= 0:
 							self.moore_total[r][c] += 1
 
-						# for r in range(row - 1, row + 2):
-						# 	for c in range(col - 1, col + 2):
-						# 		if self.rows > r >= 0 and self.cols > c >= 0 and (r == row and c == col):
+		# Reset population
+		self.generation['pop'] = 0
 
-		#print(self.moore_total)
+		# Increment year
+		self.generation['year'] += 1
 
 		for row in range(self.rows):
 			for col in range(self.cols):
@@ -89,28 +90,30 @@ class Grid():
 				self.moore_total[row][col] = 0
 
 				# if cell is alive
-				if self.grid[row][col]:
+				if self.generation['grid'][row][col]:
 
 					if moore_total < 2:
-						self.grid[row][col] = 0
+						self.generation['grid'][row][col] = 0
 					elif moore_total == 2 or moore_total == 3:
-						self.grid[row][col] = 1
+						self.generation['grid'][row][col] = 1
+						self.generation['pop'] += 1
 					elif moore_total >= 4:
-						self.grid[row][col] = 0
+						self.generation['grid'][row][col] = 0
 
 				# if cell is dead
 				else:
 					if moore_total == 3:
-						self.grid[row][col] = 1
+						self.generation['grid'][row][col] = 1
+						self.generation['pop'] += 1
 
 
 	def predict(self, num=10):
 		del(self.predictions)
 		self.predictions = []
 		for i in range(num):
-			#newList = list(self.grid)
-			self.predictions.append(copy.deepcopy(self.grid))
-			#self.predictions.append(self.grid)
+			#newList = list(self.generation['grid'])
+			self.predictions.append(copy.deepcopy(self.generation))
+			#self.predictions.append(self.generation['grid'])
 			self.step()
 
 
@@ -120,12 +123,14 @@ class Grid():
 		print(pattern_matrix.grid)
 		pattern_matrix = json.JSONDecoder().decode(pattern_matrix.grid)
 
-
 		print('(rows, col)' + str((self.rows, self.cols)))
 
 		for i in range(len(pattern_matrix)):
 			for j in range(len(pattern_matrix[0])):
-				self.grid[row + i][col + j] = pattern_matrix[i][j]
+
+				cell_change = pattern_matrix[i][j] - self.generation['grid'][row + i][col + j]
+				self.generation['pop'] += cell_change
+				self.generation['grid'][row + i][col + j] = pattern_matrix[i][j]
 
 		return
 
@@ -136,19 +141,24 @@ class Grid():
 
 		for el in new_cells:
 			# print(el)
-			self.grid[el['row']][el['col']] = 1
+			self.generation['grid'][el['row']][el['col']] = 1
 
 	def clear(self):
 		for i in range(self.rows):
 			for j in range(self.cols):
-				self.grid[i][j] = 0
+				self.generation['grid'][i][j] = 0
+
+		self.generation['year'] = 0
+		self.generation['pop'] = 0
 
 
 	def __str__(self):
-		self.grid_str = ''
-		for i in range(len(self.grid)):
-			self.grid_str += str(self.grid[i]) + '\n'
-		return self.grid_str
+		grid_str = ''
+		for i in range(len(self.generation['grid'])):
+			grid_str += str(self.generation['grid'][i]) + '\n'
+		return grid_str
+
+
 
 
 	def str_predictions(self):
@@ -164,7 +174,7 @@ class Grid():
 
 
 	def get_grid(self):
-		return self.grid
+		return self.generation['grid']
 
 
 '''
@@ -188,27 +198,27 @@ class Grid():
 # 	return myGrid
 
 
-myGrid = Grid(50, 75)
-myGrid.random()
-print(myGrid)
-startTime = time.time()
-myGrid.predict()
-endTime = time.time()
-print(myGrid.str_predictions())
-print('Prediciton Time: ' + str(endTime - startTime))
-
-# jsonify(myGrid)
-
-# myGrid.add_pattern(10, 5, 'block')
-
-exploder = Grid()
-exploder.grid[5][5] = 1
-exploder.grid[6][4] = 1
-exploder.grid[6][5] = 1
-exploder.grid[6][6] = 1
-exploder.grid[7][4] = 1
-exploder.grid[7][6] = 1
-exploder.grid[8][5] = 1
+myGrid = Conway(50, 75)
+# myGrid.random()
+# print(myGrid)
+# startTime = time.time()
+# myGrid.predict()
+# endTime = time.time()
+# print(myGrid.str_predictions())
+# print('Prediciton Time: ' + str(endTime - startTime))
+#
+# # jsonify(myGrid)
+#
+# # myGrid.add_pattern(10, 5, 'block')
+#
+# exploder = Conway()
+# exploder.generation['grid'][5][5] = 1
+# exploder.generation['grid'][6][4] = 1
+# exploder.generation['grid'][6][5] = 1
+# exploder.generation['grid'][6][6] = 1
+# exploder.generation['grid'][7][4] = 1
+# exploder.generation['grid'][7][6] = 1
+# exploder.generation['grid'][8][5] = 1
 
 
 # print((i,j) == (29, 27))
