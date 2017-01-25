@@ -47,6 +47,7 @@ var Simulation = function() {
     obj.isPredicting = false;
     obj.isFrozen = false;
 
+
     obj.pop = 0;
     obj.year = 0;
 
@@ -64,6 +65,9 @@ var Simulation = function() {
     obj.stopSimulation = stopSimulation;
     obj.clearSimulation = clearSimulation;
 
+    obj.outgoingNum = 0;
+    obj.incomingNum = 0;
+
 
 
     obj.addPattern = addPattern;
@@ -71,6 +75,7 @@ var Simulation = function() {
     obj.toggleCell = toggleCell;
     obj.activateCells = activateCells;
 
+    obj.isPaused = false;
 
 
     obj.bindConsoleButtons = bindConsoleButtons;
@@ -78,7 +83,7 @@ var Simulation = function() {
     obj.addPredictions = addPredictions;
     obj.createWebSocket = createWebSocket;
     obj.sendData = sendData
-    obj.awaitPredictions = awaitPredictions;
+    obj.freezeConsole = freezeConsole;
     obj.updateStats = updateStats;
 
     obj.predictionRefresh = 15;
@@ -136,6 +141,8 @@ var createWebSocket = function() {
     socket.onmessage = function(e) {
 
 
+
+
         onmessage_time = new Date();
         console.log('WebSocket Time: ' + (onmessage_time - send_time) + 'ms');
 
@@ -146,6 +153,14 @@ var createWebSocket = function() {
         console.log('Parsed Time: ' + (parseEnd - parseStart) + 'ms');
         //draw();
 
+        simulation.incomingNum = message.order;
+        console.log('Incoming Num: ' + simulation.incomingNum)
+
+        if (simulation.incomingNum < simulation.outgoingNum) {
+            alert('Out of order!');
+            return;
+        }
+
         if (message.content == 'predictions') {
 
             // Load predictions from socket into simulation
@@ -154,12 +169,17 @@ var createWebSocket = function() {
             // Indicate that client is done retrieving predictions
             simulation.isPredicting = false;
 
+
+
+
         }
 
         else if (message.content == 'generation') {
 
             // Load single generation into predictions queue
             simulation.addPredictions([message.generation])
+
+            // Here I should unpause and unfreeze console
 
         }
 
@@ -190,6 +210,13 @@ var createWebSocket = function() {
             simulation.drawGrid();
 
         }
+
+        if (simulation.isFrozen) {
+            thawConsole();
+            simulation.isPaused = false;
+        }
+
+
 
      }
 
@@ -281,7 +308,8 @@ var bindConsoleButtons = function() {
     $btnRandom.on('staticClick', function() {
 
         message_data = { 'command': 'random' };
-        socket.send(JSON.stringify(message_data));
+        //simulation.outgoingNum += 1;
+        //socket.send(JSON.stringify(message_data));
 
     })
 
@@ -354,6 +382,9 @@ var bindConsoleButtons = function() {
 var sendData = function(message_data) {
 
     send_time = new Date();
+
+    simulation.outgoingNum += 1;
+    console.log('Outgoing Num: ' + simulation.outgoingNum);
     this.socket.send(JSON.stringify(message_data));
 
 }
@@ -413,12 +444,17 @@ var stepSimulation = function() {
     // If simulation is running, do nothing
     //if (this.isRunning) { return; }
 
+    // If simulation is paused, do nothing
+    if (this.isPaused) { return; }
+
     // If grid is empty, do nothing
     if (this.pop == 0) { return; }
 
     // If no predictions are available, wait for new ones to come from server
     else if (this.predictions.length == 0) {
-        this.awaitPredictions();
+        this.isPaused = true;
+        this.freezeConsole();
+        //this.runSimulation();
         return;
     }
 
@@ -611,7 +647,7 @@ var activateCells = function(newCells) {
     this.predictions = [];
 
     // Await predictions
-    this.awaitPredictions();
+    this.freezeConsole();
 
     message_data =  {
         serverCommand: 'activateCells',
@@ -676,11 +712,13 @@ var getRowCol = function(x, y) {
 //*************************************************//
 var addPattern = function(x, y, pattern) {
 
+    console.log('Add pattern!');
+
     // Empty out predictions
     this.predictions = [];
 
     // Await predictions
-    this.awaitPredictions()
+    this.freezeConsole()
 
     // Compute coordinates of placed pattern
     var coord = this.getRowCol(x, y);
@@ -697,55 +735,38 @@ var addPattern = function(x, y, pattern) {
 
     this.sendData(message_data);
 
-
 }
 
 
 //*************************************************//
 // Load wait screen, disable button, while awaiting predictions
 //*************************************************//
-var awaitPredictions = function() {
+var freezeConsole = function() {
 
-    // Flag to indicate if simulation is paused
-    //var simPaused = false;
-
-
-    // If simulation is on (and isn't frozen), freeze it
-    if (this.isRunning) {
-        this.stopSimulation();
-        this.isFrozen = true;
-    }
+    // Indicate that simulation is frozen
+    this.isFrozen = true;
 
     // Show loading screen
     $('.loader-wrapper').css('display', 'flex');
 
-    // Stop console functionality
-
-
     // Store 'this' (to pass to setInterval)
-    var that = this;
+    //var that = this;
 
     // Create a setInterval that run while predictions are being generated
-    this.simInterval = setInterval(function() {
+    this.freezeInterval = setInterval(function() { return; }, 20);
 
-        if (that.predictions.length > 0) {
-
-            // Deactivate setInterval
-            clearInterval(this.simInterval);
-
-            // Hide loader
-            $('.loader-wrapper').css('display', 'none');
-
-            // If simulation is frozen, unfreeze and run
-            if (that.isFrozen) {
-                that.isFrozen = false;
-                that.runSimulation();
-            }
-        }
-
-    }, 20);
+}
 
 
+var thawConsole = function() {
 
+    // Deactivate setInterval
+    clearInterval(this.freezeInterval);
+
+    // Hide loader
+    $('.loader-wrapper').css('display', 'none');
+
+    // Indicate that simulation is not frozen
+    that.isFrozen = false;
 
 }

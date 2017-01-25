@@ -3,7 +3,7 @@ from channels.handler import AsgiHandler
 from .calculation import Conway
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-from channels.sessions import channel_session
+from channels.sessions import channel_session, enforce_ordering
 from time import time
 import math
 
@@ -13,6 +13,8 @@ import math
 def ws_connect(message):
 	print('Just connected')
 
+
+#@enforce_ordering(slight=False)
 @channel_session
 def ws_receive(message):
 
@@ -21,6 +23,7 @@ def ws_receive(message):
 	# Get message from client side
 	message_dict = json.JSONDecoder().decode(message.content['text'])
 
+	order = message.content['order']
 
 	if 'generations' in message.channel_session:
 
@@ -39,7 +42,8 @@ def ws_receive(message):
 			message_json = {
 				'content': 'predictions',
 				'predictions': conway.predictions,
-				'clientCommand': message_dict['clientCommand']
+				'clientCommand': message_dict['clientCommand'],
+				'order': order
 			}
 
 			# Add generation to generations array
@@ -57,7 +61,8 @@ def ws_receive(message):
 			message_json = {
 				'content': 'generation',
 				'generation': conway.generation,
-				'clientCommand': message_dict['clientCommand']
+				'clientCommand': message_dict['clientCommand'],
+				'order': order
 			}
 
 			# Empty generations array
@@ -92,7 +97,8 @@ def ws_receive(message):
 			message_json = {
 				'content': 'predictions',
 				'predictions': conway.predictions,
-				'clientCommand': message_dict['clientCommand']
+				'clientCommand': message_dict['clientCommand'],
+				'order': order
 			}
 
 			# Add generations to generations array
@@ -100,9 +106,37 @@ def ws_receive(message):
 
 		elif message_dict['serverCommand'] == 'activateCells':
 
+			# Retrieve game (with latest generation)
+			conway = message.channel_session['conway']
+
+			# Retrieve array of new cells, and year
 			new_cells = message_dict['newCells']
-			grid.activate_cells(new_cells)
-			#grid.predict(10)
+			year = message_dict['year']
+
+			# Retrieve generation at specific year
+			# Delete generations from that year forward (including that year)
+			gen = message.channel_session['generations'][year]
+			del message.channel_session['generations'][year:]
+
+			# Reset conway game to that year
+			conway.generation = gen
+
+			# Add pattern to game
+			conway.activate_cells(new_cells)
+
+			# Generate predictions
+			conway.predict(30)
+
+			# Create response message
+			message_json = {
+				'content': 'predictions',
+				'predictions': conway.predictions,
+				'clientCommand': message_dict['clientCommand'],
+				'order': order
+			}
+
+			# Add generations to generations array
+			message.channel_session['generations'].extend(conway.predictions)
 
 
 	else:
@@ -120,13 +154,14 @@ def ws_receive(message):
 			conway.add_pattern(center_row, center_col, 'lightweight spaceship')
 
 			# Generate predictions
-			conway.predict(10)
+			conway.predict(30)
 
 			# Create response message
 			message_json = {
 				'content': 'predictions',
 				'predictions': conway.predictions,
-				'clientCommand': message_dict['clientCommand']
+				'clientCommand': message_dict['clientCommand'],
+				'order': order
 			}
 
 			# Add generation to generations array

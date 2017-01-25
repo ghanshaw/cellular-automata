@@ -137,11 +137,16 @@ class Conway():
 
 	def activate_cells(self, new_cells):
 
-		# print(new_cells)
-
 		for el in new_cells:
 			# print(el)
-			self.generation['grid'][el['row']][el['col']] = 1
+			row = el['row']
+			col = el['col']
+
+			if self.rows > row >= 0 and self.cols > col >= 0:
+				self.generation['grid'][row][col] = 1
+				self.generation['pop'] += 1
+
+
 
 	def clear(self):
 		for i in range(self.rows):

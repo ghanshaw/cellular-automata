@@ -22,13 +22,34 @@ function applyDraggabilly (simulation){
     $draggieGrid.on('pointerDown', function(event, pointer) {
 
         // Flag to indicate if simulation is paused
-        $draggieGrid.simPaused = false;
+        //$draggieGrid.simPaused = false;
 
-        // If simulation is running, stop
         if (simulation.isRunning) {
-            simulation.stopSimulation();
-            $draggieGrid.simPaused = true;
+            simulation.isPaused = true;
         }
+
+
+        $draggieGrid.setCells.clear();
+        $draggieGrid.newCells = [];
+
+
+        gridEdges = Edges($grid);
+        gridX = pointer.pageX - gridEdges.left;
+        gridY = pointer.pageY - gridEdges.top;
+
+
+        var rowCol = simulation.getRowCol(gridX, gridY);
+
+        var cellId = parseFloat(rowCol.row + '.' + rowCol.col);
+        console.log(cellId);
+
+        if (!$draggieGrid.setCells.has(cellId)) {
+            $draggieGrid.newCells.push(rowCol);
+            $draggieGrid.setCells.add(cellId);
+        }
+
+        simulation.toggleCell(rowCol.row, rowCol.col, true);
+
 
     })
 
@@ -61,13 +82,6 @@ function applyDraggabilly (simulation){
 
         // Send cell update to server
         simulation.activateCells($draggieGrid.newCells);
-        $draggieGrid.setCells.clear();
-        $draggieGrid.newCells = [];
-
-         // If simulation is paused, resume simulation
-        if ($draggieGrid.simPaused) {
-            simulation.runSimulation();
-        }
 
     })
 
@@ -98,7 +112,8 @@ function applyDraggabilly (simulation){
 
             var draggieData = $draggiePattern.data('draggabilly');
 
-            $draggiePattern.simPaused = false;
+            //$draggiePattern.simPaused = false;
+            //this.isPaused = true;
 
         })
 
@@ -110,22 +125,24 @@ function applyDraggabilly (simulation){
             var gridEdges = Edges($grid);
             var patternEdges = Edges($patternWrapper);
 
-            console.log(event.currentTarget);
-            console.log(pointer);
-            console.log(patternEdges);
-            console.log(gridEdges);
+//            console.log(event.currentTarget);
+//            console.log(pointer);
+//            console.log(patternEdges);
+//            console.log(gridEdges);
 
 
             if (patternEdges.inBounds(gridEdges)) {
 
                 // If simulation is running and not paused, puase it
-                if (simulation.isRunning && !$draggiePattern.simPaused) {
+                if (simulation.isRunning && !simulation.isPaused) {
+
+                    simulation.isPaused = true;
 
                     // Stop simulation
-                    simulation.stopSimulation();
+                    //simulation.stopSimulation();
 
                     // Indicate that simulation is paused
-                    $draggiePattern.simPaused = true;
+                    //$draggiePattern.simPaused = true;
 
                 }
 
@@ -138,13 +155,15 @@ function applyDraggabilly (simulation){
             } else {
 
                 // If simulation is running and is paused, unpause it
-                if (simulation.isRunning && $draggiePattern.simPaused) {
+                if (simulation.isRunning && simulation.isPaused) {
+
+                    simulation.isPaused = false;
 
                     // Run simulation
-                    simulation.runSimulation();
+                    //simulation.runSimulation();
 
                     // Indicate that simulation is not paused
-                    $draggiePattern.simPaused = false;
+                    //$draggiePattern.simPaused = false;
 
                 }
 
@@ -187,13 +206,15 @@ function applyDraggabilly (simulation){
                 simulation.addPattern(x, y, patternName);
 
                 // If simulation is running and is paused, unpause it and resume
-                if ($draggiePattern.simPaused) {
+                if (simulation.isRunning && simulation.isPaused) {
+
+
 
                     // Indicate that simulation is not paused
-                    $draggiePattern.simPaused = false;
+                    //$draggiePattern.simPaused = false;
 
                     // Resume simulation
-                    simulation.runSimulation();
+                    //simulation.runSimulation();
 
                 }
 
@@ -214,7 +235,7 @@ function applyDraggabilly (simulation){
 
                 var translation = 'translate(0px, 0px)';
 
-                console.log($patternWrapper)
+                //console.log($patternWrapper)
 
                 //$patternWrapper.addClass('slow-transition');
 
