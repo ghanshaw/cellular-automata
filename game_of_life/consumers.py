@@ -25,29 +25,41 @@ def ws_receive(message):
 
 	order = message.content['order']
 
+
 	if 'generations' in message.channel_session:
 
 		generations = message.channel_session['generations']
 		# start_time = message.channel_session['start_time']
 
-		if message_dict['serverCommand'] == 'predict':
+		if message_dict['serverCommand'] == 'getPredictions':
 
 			# Retrieve game (with latest generation)
 			conway = message.channel_session['conway']
 
-			# Generate predictions
-			conway.predict(10)
+			# Retrieve year
+			year = int(message_dict['year'])
 
-			# Create response message
+			# Compute number of predictions left to create
+			num_predictions = year + 30 - conway.generation['year']
+
+			if num_predictions > 0:
+				# Generate new predictions
+				conway.predict(num_predictions)
+
+				# Delete last year from generations array
+				del message.channel_session['generations'][-1]
+
+				# Add generations to generations array
+				message.channel_session['generations'].extend(conway.predictions)
+
 			message_json = {
 				'content': 'predictions',
-				'predictions': conway.predictions,
+				'predictions': generations[year:year + 30],
 				'clientCommand': message_dict['clientCommand'],
+				'genTimeline': conway.gen_timeline,
 				'order': order
 			}
 
-			# Add generation to generations array
-			message.channel_session['generations'].extend(conway.predictions)
 
 		elif message_dict['serverCommand'] == 'clear':
 
@@ -62,6 +74,7 @@ def ws_receive(message):
 				'content': 'generation',
 				'generation': conway.generation,
 				'clientCommand': message_dict['clientCommand'],
+				'genTimeline': conway.gen_timeline,
 				'order': order
 			}
 
@@ -84,6 +97,9 @@ def ws_receive(message):
 			gen = message.channel_session['generations'][year]
 			del message.channel_session['generations'][year:]
 
+			# Erase future
+			conway.erase_future(year)
+
 			# Reset conway game to that year
 			conway.generation = gen
 
@@ -98,6 +114,7 @@ def ws_receive(message):
 				'content': 'predictions',
 				'predictions': conway.predictions,
 				'clientCommand': message_dict['clientCommand'],
+				'genTimeline': conway.gen_timeline,
 				'order': order
 			}
 
@@ -118,6 +135,9 @@ def ws_receive(message):
 			gen = message.channel_session['generations'][year]
 			del message.channel_session['generations'][year:]
 
+			# Erase future
+			conway.erase_future(year)
+
 			# Reset conway game to that year
 			conway.generation = gen
 
@@ -132,11 +152,50 @@ def ws_receive(message):
 				'content': 'predictions',
 				'predictions': conway.predictions,
 				'clientCommand': message_dict['clientCommand'],
+				'genTimeline': conway.gen_timeline,
 				'order': order
 			}
 
 			# Add generations to generations array
 			message.channel_session['generations'].extend(conway.predictions)
+
+		elif message_dict['serverCommand'] == 'randomize':
+
+			# Retrieve game (with latest generation)
+			conway = message.channel_session['conway']
+
+			# Retrieve year
+			year = message_dict['year']
+
+			# Retrieve generation at specific year
+			# Delete generations from that year forward (including that year)
+			gen = message.channel_session['generations'][year]
+			del message.channel_session['generations'][year:]
+
+			# Erase future
+			conway.erase_future(year)
+
+			# Reset conway game to that year
+			conway.generation = gen
+
+			# Randomize board, while preserving year
+			conway.randomize(year)
+
+			# Generate predictions
+			conway.predict(30)
+
+			# Create response message
+			message_json = {
+				'content': 'predictions',
+				'predictions': conway.predictions,
+				'clientCommand': message_dict['clientCommand'],
+				'genTimeline': conway.gen_timeline,
+				'order': order
+			}
+
+			# Add generations to generations array
+			message.channel_session['generations'].extend(conway.predictions)
+
 
 
 	else:
@@ -161,6 +220,7 @@ def ws_receive(message):
 				'content': 'predictions',
 				'predictions': conway.predictions,
 				'clientCommand': message_dict['clientCommand'],
+				'genTimeline': conway.gen_timeline,
 				'order': order
 			}
 
@@ -169,6 +229,8 @@ def ws_receive(message):
 
 
 	# Add grid to session
+
+	assert len(conway.gen_timeline) == len(message.channel_session['generations'])
 
 	message.channel_session['start_time'] = start_time
 	message.channel_session['conway'] = conway

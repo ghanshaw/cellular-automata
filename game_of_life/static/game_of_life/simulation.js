@@ -43,7 +43,7 @@ var Simulation = function() {
     obj.simSpeed = 'slow';
     obj.predictions = [];
 
-    obj.isOn = false;
+    obj.isRunning = false;
     obj.isPredicting = false;
     obj.isFrozen = false;
 
@@ -68,6 +68,7 @@ var Simulation = function() {
     obj.outgoingNum = 0;
     obj.incomingNum = 0;
 
+    obj.randomizeSimulation = randomizeSimulation
 
 
     obj.addPattern = addPattern;
@@ -76,6 +77,7 @@ var Simulation = function() {
     obj.activateCells = activateCells;
 
     obj.isPaused = false;
+    obj.isAltering = false;
 
 
     obj.bindConsoleButtons = bindConsoleButtons;
@@ -84,7 +86,18 @@ var Simulation = function() {
     obj.createWebSocket = createWebSocket;
     obj.sendData = sendData
     obj.freezeConsole = freezeConsole;
+    obj.thawConsole = thawConsole;
     obj.updateStats = updateStats;
+
+    obj.chooseGeneration = chooseGeneration;
+
+
+    // --- D3 methods and variables
+    obj.initChart = initChart;
+    obj.genTimeline  = [];
+    obj.recordHistory = recordHistory;
+    obj.eraseHistory = eraseHistory;
+
 
     obj.predictionRefresh = 15;
 
@@ -98,7 +111,8 @@ var Simulation = function() {
 
 }
 
-restartConnection  = function() {
+
+var restartConnection  = function() {
 
     // Freeze simulation
 
@@ -141,8 +155,6 @@ var createWebSocket = function() {
     socket.onmessage = function(e) {
 
 
-
-
         onmessage_time = new Date();
         console.log('WebSocket Time: ' + (onmessage_time - send_time) + 'ms');
 
@@ -160,6 +172,8 @@ var createWebSocket = function() {
             alert('Out of order!');
             return;
         }
+
+        simulation.genTimeline = message.genTimeline;
 
         if (message.content == 'predictions') {
 
@@ -191,6 +205,10 @@ var createWebSocket = function() {
             simulation.pop = generation['pop'];
             simulation.year = generation['year'];
 
+
+            // Record population/year to history array
+            //simulation.recordHistory();
+
             // Draw grid
             simulation.drawGrid();
 
@@ -198,7 +216,7 @@ var createWebSocket = function() {
             simulation.updateStats()
         }
 
-        if (message.clientCommand == 'eraseCanvas') {
+        else if (message.clientCommand == 'eraseCanvas') {
 
             // Apply empty generation
             simulation.grid = message.generation['grid'];
@@ -212,16 +230,34 @@ var createWebSocket = function() {
         }
 
         if (simulation.isFrozen) {
-            thawConsole();
-            simulation.isPaused = false;
+            simulation.thawConsole();
         }
 
-
+        if (!simulation.isAltering) {
+            simulation.isPaused = false;
+        }
 
      }
 
      return socket;
 
+
+}
+
+
+
+var recordHistory = function() {
+
+    simulation.genTimeline.push({
+        year: this.year,
+        pop: this.pop
+    })
+
+}
+
+var eraseHistory = function() {
+
+    simulation.genTimeline = [];
 }
 
 
@@ -277,6 +313,9 @@ var bindConsoleButtons = function() {
             $this.addClass('switched-on');
             $this.text('Stop');
 
+            // Add console-freezable class
+            $this.removeClass('console-freezable');
+
             // Run simulation
             simulation.runSimulation();
 
@@ -287,6 +326,9 @@ var bindConsoleButtons = function() {
             // Style button
             $this.removeClass('switched-on');
             $this.text('Run');
+
+            // Add console-freezable class
+            $this.addClass('console-freezable');
 
             simulation.stopSimulation();
 
@@ -307,9 +349,7 @@ var bindConsoleButtons = function() {
 
     $btnRandom.on('staticClick', function() {
 
-        message_data = { 'command': 'random' };
-        //simulation.outgoingNum += 1;
-        //socket.send(JSON.stringify(message_data));
+         simulation.randomizeSimulation()
 
     })
 
@@ -319,9 +359,11 @@ var bindConsoleButtons = function() {
 
     $btnClear.on('staticClick', function() {
 
-        // Style button
+        // Style run button
         $('#button-run').removeClass('switched-on');
+        $('#button-run').addClass('console-freezable');
         $('#button-run').text('Run');
+
 
         // Clear simulation
         simulation.clearSimulation();
@@ -373,6 +415,29 @@ var bindConsoleButtons = function() {
 
     }
 
+
+    // Create draggabilly generation selection button
+    $draggieChooseGen = $('#choose-gen').draggabilly({});
+    $draggieChooseGen.draggabilly('disable');
+
+    $draggieChooseGen.on('staticClick', function(event, pointer) {
+
+        var chooseYear = $('#choose-gen-input').val();
+
+        // If chosen year is less than year active currently
+        if (chooseYear <= simulation.year && chooseYear >= 0) {
+
+            // Pause simulation if it's running
+            if (simulation.isRunning) {
+                simulation.isPaused = true;
+            }
+
+            // Choose simulation
+            simulation.chooseGeneration(chooseYear);
+        }
+
+    })
+
 }
 
 
@@ -400,7 +465,8 @@ var sendData = function(message_data) {
 //*************************************************//
  var startSimulation = function() {
 
-    // Initialize simulation
+    // Freeze console while loading
+    this.freezeConsole();
 
     // Bind console buttons
     this.bindConsoleButtons();
@@ -467,8 +533,11 @@ var stepSimulation = function() {
     // Draw grid
     this.drawGrid();
 
+    // Record history
+    //this.recordHistory();
+
     // Update statistics
-    simulation.updateStats()
+    this.updateStats()
 
     // If prediction buffer is too low, add predictions
     if (this.predictions.length <= this.predictionRefresh && !this.isPredicting) {
@@ -476,12 +545,16 @@ var stepSimulation = function() {
         console.log('Get predictions!');
 
         // Indicate that client is retrieving more predictions
-        this.isPredicting = true
+        this.isPredicting = true;
+
+        // Get last year currently in prediction queue
+        var lastYear = this.predictions[0].year;
 
         // Send data to WebSocket
         message_data =  {
-            'serverCommand': 'predict',
-            'clientCommand': ''
+            'serverCommand': 'getPredictions',
+            'clientCommand': '',
+            year: lastYear + 1
         }
 
         this.sendData(message_data);
@@ -524,7 +597,6 @@ var stopSimulation = function() {
 }
 
 
-
 //*************************************************//
 // Clear simulation canvas
 //*************************************************//
@@ -538,9 +610,42 @@ var clearSimulation = function() {
     // Clear predictions
     this.predictions = [];
 
+    // Erase history
+    this.eraseHistory();
+
+    // Freeze console
+    this.freezeConsole();
+
+
     message_data =  {
         'serverCommand': 'clear',
         'clientCommand': 'drawGrid',
+    }
+
+    this.sendData(message_data);
+}
+
+
+//*************************************************//
+// Randomize simulation canvas
+//*************************************************//
+var randomizeSimulation = function() {
+
+    // If simulation is running, stop
+    if (this.isRunning) {
+        this.isPaused = true;
+    }
+
+    // Clear predictions
+    this.predictions = [];
+
+    // Freeze console
+    this.freezeConsole();
+
+    message_data =  {
+        'serverCommand': 'randomize',
+        'clientCommand': 'drawGrid',
+        'year': this.year
     }
 
     this.sendData(message_data);
@@ -636,8 +741,6 @@ var eraseCanvas = function() {
 }
 
 
-
-
 //*************************************************//
 // Make cells highlighted by user active
 //*************************************************//
@@ -646,7 +749,7 @@ var activateCells = function(newCells) {
     // Empty out predictions
     this.predictions = [];
 
-    // Await predictions
+    // Freeze console
     this.freezeConsole();
 
     message_data =  {
@@ -659,8 +762,6 @@ var activateCells = function(newCells) {
     this.sendData(message_data);
 
 }
-
-
 
 
 var updateStats = function() {
@@ -749,6 +850,9 @@ var freezeConsole = function() {
     // Show loading screen
     $('.loader-wrapper').css('display', 'flex');
 
+    // Freeze buttons
+    $('.console-freezable').addClass('frozen');
+
     // Store 'this' (to pass to setInterval)
     //var that = this;
 
@@ -766,7 +870,73 @@ var thawConsole = function() {
     // Hide loader
     $('.loader-wrapper').css('display', 'none');
 
+    // Freeze buttons
+    $('.console-freezable').removeClass('frozen');
+
     // Indicate that simulation is not frozen
-    that.isFrozen = false;
+    this.isFrozen = false;
+
+}
+
+var initChart = function() {
+
+
+    // Create d3 chart object
+    var d3Chart = d3.select('#d3-chart')
+
+    // Perform data join, bind incoming data to svg elements (which don't yet exist)
+    //var svgPoints = d3Chart.selectAll('svg').data(data).enter()
+    //var svgPoints = d3Chart.selectAll('svg');
+
+    var svgSpace = d3Chart.select('#svg-space');
+
+    var svgWidth = parseInt(svgSpace.style('width'));
+    var svgHeight = parseInt(svgSpace.style('height'));
+
+    // Data relationships -- links data to svg groups (which may or may not exist already)
+    var svgPoints = svgSpace.selectAll('g').data(this.genTimeline).enter();
+
+
+    // xScale is the generation
+    var xScale = d3.scaleLinear().domain([0, this.year + 10]).range([0, svgWidth]);
+
+    // yScale is the population
+    var yScale = d3.scaleLinear().domain([0, 100]).range([svgHeight, 0]);
+
+    // Create and style the svg points
+    var svgCircle = svgPoints.append('circle')
+        .attr('r', '4')
+        .attr('fill', '#00cc99')
+        .attr('cx', function(d, i) {
+            return xScale(d.year);
+            })
+        .attr('cy', function(d, i) {
+            return yScale(d.pop);
+            })
+
+
+}
+
+var updateChart = function() {
+
+}
+
+
+var chooseGeneration = function(year) {
+
+    // Empty out predictions
+    this.predictions = [];
+
+    // Freeze console
+    this.freezeConsole()
+
+
+    message_data =  {
+        serverCommand: 'getPredictions',
+        clientCommand: 'drawGrid',
+        year: year
+    }
+
+    this.sendData(message_data);
 
 }

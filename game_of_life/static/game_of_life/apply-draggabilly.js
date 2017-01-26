@@ -26,6 +26,7 @@ function applyDraggabilly (simulation){
 
         if (simulation.isRunning) {
             simulation.isPaused = true;
+            simulation.isAltering = true;
         }
 
 
@@ -53,6 +54,7 @@ function applyDraggabilly (simulation){
 
     })
 
+
     $draggieGrid.on('pointerMove', function(event, pointer) {
 
 
@@ -79,6 +81,8 @@ function applyDraggabilly (simulation){
 
 
     $draggieGrid.on('pointerUp', function(event, pointer) {
+
+        simulation.isAltering = false;
 
         // Send cell update to server
         simulation.activateCells($draggieGrid.newCells);
@@ -137,6 +141,7 @@ function applyDraggabilly (simulation){
                 if (simulation.isRunning && !simulation.isPaused) {
 
                     simulation.isPaused = true;
+                    simulation.isAltering = true;
 
                     // Stop simulation
                     //simulation.stopSimulation();
@@ -154,16 +159,13 @@ function applyDraggabilly (simulation){
 
             } else {
 
+
+
                 // If simulation is running and is paused, unpause it
                 if (simulation.isRunning && simulation.isPaused) {
 
                     simulation.isPaused = false;
-
-                    // Run simulation
-                    //simulation.runSimulation();
-
-                    // Indicate that simulation is not paused
-                    //$draggiePattern.simPaused = false;
+                    simulation.isAltering = false;
 
                 }
 
@@ -186,8 +188,9 @@ function applyDraggabilly (simulation){
             var gridEdges = Edges($grid);
             var patternEdges = Edges($pattern);
 
-            // Compute the x, y within grid
-            if (patternEdges.inBounds(gridEdges)) {
+            // If you drop in bounds and simulation isn't frozen
+            if (patternEdges.inBounds(gridEdges) && !simulation.isFrozen) {
+
 
                 // Remove styling, fade element and return it
                 $patternWrapper.fadeOut(500, function() {
@@ -203,6 +206,7 @@ function applyDraggabilly (simulation){
                 x = Math.abs(x);
                 y = Math.abs(y);
 
+                simulation.isAltering = false;
                 simulation.addPattern(x, y, patternName);
 
                 // If simulation is running and is paused, unpause it and resume

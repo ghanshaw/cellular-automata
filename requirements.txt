@@ -4,8 +4,10 @@ channels==1.0.2
 constantly==15.1.0
 daphne==1.0.1
 Django==1.10.5
+django-debug-toolbar==1.6
 incremental==16.10.1
 six==1.10.0
+sqlparse==0.2.2
 Twisted==16.6.0
 txaio==2.6.0
 zope.interface==4.3.3

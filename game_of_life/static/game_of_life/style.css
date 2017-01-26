@@ -220,10 +220,15 @@ Section - Simulation
 
 }
 
-#section-simulation .pop-graph {
+#section-simulation #d3-chart {
     border: 1px solid black;
     width: 100%;
     height: 300px;
+}
+
+#section-simulation #svg-space {
+    width: 100%;
+    height: 100%;
 }
 
 #section-simulation .row-still {
@@ -324,4 +329,36 @@ Section - Simulation
 #section-simulation figcaption {
     margin-top: 5px;
     font-size: 12px;
+}
+
+#section-simulation .console-freezable.frozen {
+    pointer-events: none;
+}
+
+#section-simulation .btn-console.frozen {
+    //background-color: #dadada;
+    color: #adadad;
+}
+
+#section-simulation .pattern-wrapper.frozen  {
+    background-color: white;
+}
+
+
+#section-simulation .pattern-wrapper.frozen img.pattern-overlay  {
+    opacity: .2;
+}
+
+#section-simulation .pattern-wrapper.frozen.in-bounds {
+    background-color: white;
+}
+
+#section-simulation .pattern-wrapper.frozen.is-dragging img.pattern-overlay {
+    box-shadow: none;
+    border: none;
+}
+
+#section-simulation .pattern-wrapper.frozen.is-bounds img.pattern-overlay {
+    box-shadow: none;
+    border: none;
 }

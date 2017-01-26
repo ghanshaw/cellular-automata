@@ -41,6 +41,11 @@
 			type="text/javascript">
 	</script>
 
+	<!-- D3.js -->
+	<script
+			src="https://d3js.org/d3.v4.min.js">
+	</script>
+
 	<!-- Draggabilly -->
 	<script
 			src="https://npmcdn.com/draggabilly@2.1/dist/draggabilly.pkgd.min.js">
@@ -179,11 +184,14 @@
 				</div>
 
 				<div class='col-md-4'>
-					<div class="pop-graph"></div>
+					<div id="d3-chart">
+						<svg id="svg-space"></svg>
+					</div>
 					<div class="console-stats">
 						<h2>Population: <span id="console-pop">0</span></h2>
 						<h2>Generation: <span id="console-gen">0</span></h2>
-						<h2>Choose Generation: <input><button id="choose-gen">Submit</button></h2>
+						<h2>Choose Generation: <input id="choose-gen-input" type="text"></h2>
+						<button id="choose-gen">Submit</button>
 					</div>
 				</div>
 			</div>
@@ -192,12 +200,12 @@
 
 				<div class='col-md-12'>
 					<h4>Console</h4>
-					<button type="button" class="btn-console" id="button-step">Step</button>
-					<button type="button" class="btn-console btn-run switch" id="button-run">Run</button>
+					<button type="button" class="btn-console console-freezable" id="button-step">Step</button>
+					<button type="button" class="btn-console btn-run switch console-freezable" id="button-run">Run</button>
 					<button type="button" class="btn-console" id="button-clear">Clear</button>
-					<button type="button" class="btn-console btn-speed switch" id="button-slow"> > </button>
-					<button type="button" class="btn-console btn-speed switch" id="button-medium"> >> </button>
-					<button type="button" class="btn-console btn-speed switch" id="button-fast"> >>> </button>
+					<button type="button" class="btn-console btn-speed switch console-freezable" id="button-slow"> > </button>
+					<button type="button" class="btn-console btn-speed switch console-freezable" id="button-medium"> >> </button>
+					<button type="button" class="btn-console btn-speed switch console-freezable" id="button-fast"> >>> </button>
 				</div>
 
 			</div>
@@ -213,7 +221,7 @@
 
 					{% for pattern in still_lifes %}
 					<figure>
-						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
 							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
@@ -228,7 +236,7 @@
 
 					{% for pattern in oscillators %}
 					<figure>
-						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
 							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
@@ -249,7 +257,7 @@
 
 					{% for pattern in spaceships %}
 					<figure>
-						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
 							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
@@ -264,7 +272,7 @@
 
 					{% for pattern in infinite_growth %}
 					<figure>
-						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper" draggable="">
+						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
 							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
@@ -286,9 +294,9 @@
 						<!--<input type="text" class="form-control" id="text-pattern" placeholder="Text Pattern">-->
 						<!--<button type="button" class="btn-console" id="button-text-pattern">Go</button>-->
 					<!--</form>-->
-					<button type="button" class="btn-console" id="button-random">Random</button>
+					<button type="button" class="btn-console console-freezable" id="button-random">Random</button>
 
-					<button type="button" class="btn-console" id="button-puffer">Puffer Train</button>
+					<button type="button" class="btn-console console-freezable" id="button-puffer">Puffer Train</button>
 				</div>
 
 			</div>

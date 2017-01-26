@@ -23,6 +23,8 @@ class Conway():
 			'pop': 0
 		}
 
+		self.gen_timeline = []
+
 		self.predictions = []
 		self.make_generation(rows, cols)
 
@@ -44,12 +46,18 @@ class Conway():
 
 
 
-	def random(self):
+	def randomize(self, year=None):
 		self.clear()
 		for i in range(self.rows):
 			for j in range(self.cols):
 				if randint(0, 1):
 					self.generation['grid'][i][j] = 1
+					self.generation['pop'] += 1
+
+		if year is not None:
+			self.generation['year'] = year
+
+		self.record_history()
 
 
 	# Step through another generations
@@ -106,15 +114,27 @@ class Conway():
 						self.generation['grid'][row][col] = 1
 						self.generation['pop'] += 1
 
+		# Record history
+		self.record_history()
+
 
 	def predict(self, num=10):
-		del(self.predictions)
+
+		# Delete existing predictions
+		del self.predictions
 		self.predictions = []
+
+		# Append current generation
+		self.append_prediction()
+
 		for i in range(num):
-			#newList = list(self.generation['grid'])
-			self.predictions.append(copy.deepcopy(self.generation))
-			#self.predictions.append(self.generation['grid'])
 			self.step()
+			self.append_prediction()
+
+
+	# Append current generation to predictions list
+	def append_prediction(self):
+		self.predictions.append(copy.deepcopy(self.generation))
 
 
 	def add_pattern(self, row, col, pattern):
@@ -132,7 +152,34 @@ class Conway():
 				self.generation['pop'] += cell_change
 				self.generation['grid'][row + i][col + j] = pattern_matrix[i][j]
 
+		self.record_history()
 		return
+
+	def record_history(self):
+
+		year = self.generation['year']
+		pop = self.generation['pop']
+
+		try:
+			self.gen_timeline[year] = pop
+		except IndexError:
+			if len(self.gen_timeline) == year:
+				self.gen_timeline.append(pop)
+			else:
+				print("You're adding a generation that shouldn't exist.")
+				print("Year is {} and Population is {}".format(year, pop))
+				raise
+
+		return
+
+	def erase_future(self, year):
+		del self.gen_timeline[year:]
+
+
+
+
+
+
 
 
 	def activate_cells(self, new_cells):
@@ -146,7 +193,8 @@ class Conway():
 				self.generation['grid'][row][col] = 1
 				self.generation['pop'] += 1
 
-
+		self.record_history()
+		return
 
 	def clear(self):
 		for i in range(self.rows):
@@ -155,6 +203,7 @@ class Conway():
 
 		self.generation['year'] = 0
 		self.generation['pop'] = 0
+		self.record_history()
 
 
 	def __str__(self):
