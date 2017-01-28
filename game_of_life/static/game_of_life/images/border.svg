@@ -1,0 +1,15 @@
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100" height="100" >
+<style type="text/css">
+	.st0{fill:#A7A9AC;stroke:#000000;stroke-width:6;stroke-miterlimit:10;}
+	.st1{fill:#6D6E71;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;}
+	.st2{fill:#FFFFFF;stroke:#000000;stroke-width:3;stroke-miterlimit:10;}
+	.st3{fill:none;stroke:#000000;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;}
+</style>
+<rect id="XMLID_1_" x="0" class="st0" width="100" height="100"/>
+<rect id="XMLID_10_" x="22.1" y="22.1" class="st1" width="55.7" height="55.7"/>
+<rect id="XMLID_11_" x="33.3" y="33.3" class="st2" width="33.3" height="33.3"/>
+<line id="XMLID_12_" class="st3" x1="22.1" y1="22.1" x2="33.3" y2="33.3"/>
+<line id="XMLID_13_" class="st3" x1="77.8" y1="22.1" x2="66.7" y2="33.3"/>
+<line id="XMLID_14_" class="st3" x1="77.8" y1="77.8" x2="66.7" y2="66.6"/>
+<line id="XMLID_15_" class="st3" x1="22.1" y1="77.8" x2="33.3" y2="66.6"/>
+</svg>

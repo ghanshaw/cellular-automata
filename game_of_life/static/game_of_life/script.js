@@ -66,6 +66,9 @@ $(document).ready(function() {
     // Create menu
     applySlideoutMenu();
 
+     // Create chart object
+     chart = populationChart();
+     chart.initChart();
 
     // Create simulation object
     simulation = Simulation();
@@ -77,6 +80,10 @@ $(document).ready(function() {
     // Enable drag/drop, various clicking features
     // Attach events to simulation buttons
      applyDraggabilly(simulation);
+
+
+
+
 
 
 })

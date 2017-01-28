@@ -18,7 +18,7 @@ General
 -----------------------------
 */
 
-h1, h2 h3, h4, h5, h6, p {
+h1, h2, h3, h4, h5, h6, p {
 
     font-family: 'Roboto-light';
     line-height: 1.6;
@@ -38,17 +38,6 @@ body {
     outline: none;
 }
 
-
-
-#grid {
-
-    //box-shadow: 5px 5px 10px #999;
-    background-color: white;
-    width: 100%;
-    height: 500px;
-    box-shadow: 5px 5px 20px grey;
-    border-radius: 10px;
-}
 
 
 .hamburger {
@@ -192,6 +181,14 @@ Section - Simulation
 
 #section-simulation .canvas-wrapper {
     position: relative;
+    border: 40px solid grey;
+    border-image-source: url(/static/game_of_life/images/border.svg);
+    border-image-slice: 33%;
+    border-image-width: initial;
+    border-image-outset: initial;
+    border-image-repeat: stretch;
+    height: 500px;
+
 }
 
 #section-simulation .loader-wrapper {
@@ -202,11 +199,17 @@ Section - Simulation
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 500px;
-    border-radius: 10px;
+    height: 100%;
     display: none;
+    border: 4px solid black;
 }
 
+#section-simulation canvas#grid {
+    border: 4px solid black;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+}
 
 #section-simulation .loader {
     width: 50px;
@@ -220,15 +223,22 @@ Section - Simulation
 
 }
 
-#section-simulation #d3-chart {
-    border: 1px solid black;
-    width: 100%;
-    height: 300px;
+#section-simulation .console-stats {
+    text-align: center;
 }
 
-#section-simulation #svg-space {
+#section-simulation #d3-chart {
+    width: 100%;
+    height: 300px;
+    box-shadow: 5px 5px 15px #888;
+}
+
+
+
+#section-simulation #svg-chart {
     width: 100%;
     height: 100%;
+    background-color: white;
 }
 
 #section-simulation .row-still {

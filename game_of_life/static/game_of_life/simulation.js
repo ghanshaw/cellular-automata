@@ -30,14 +30,16 @@ var Simulation = function() {
     ctx.beginPath();
 
 
+
+
     /* Some arbitrary constant that determines the approx. length of cell side */
     /* Should change based on the size of the screen */
-    obj.cellSide = 10;
+    obj.cellSide = 12;
 
     obj.gridCols = Math.floor(ctx.canvas.width / obj.cellSide);
     obj.gridRows = Math.floor(ctx.canvas.height / obj.cellSide);
 
-    obj.cellWidth = Math.floor(ctx.canvas.width / obj.gridCols);
+    obj.cellWidth = ctx.canvas.width / obj.gridCols;
     obj.cellHeight = ctx.canvas.height / obj.gridRows;
 
     obj.simSpeed = 'slow';
@@ -51,6 +53,7 @@ var Simulation = function() {
     obj.pop = 0;
     obj.year = 0;
 
+    obj.chart = chart;
 
 
     // Drawing methods
@@ -668,7 +671,8 @@ var drawRowsCols = function() {
     var rc_ctx = rc_canvas.getContext('2d');
 
 
-    rc_ctx.strokeStyle = '#ddd';
+    //rc_ctx.strokeStyle = '#ddd';
+    rc_ctx.strokeStyle = '#0af1b5';
     rc_ctx.lineWidth = 1;
 
     // First draw columns lines
@@ -768,6 +772,8 @@ var updateStats = function() {
 
     $('#console-pop').text(this.pop);
     $('#console-gen').text(this.year);
+
+    chart.drawChart();
 
 }
 
@@ -878,48 +884,7 @@ var thawConsole = function() {
 
 }
 
-var initChart = function() {
 
-
-    // Create d3 chart object
-    var d3Chart = d3.select('#d3-chart')
-
-    // Perform data join, bind incoming data to svg elements (which don't yet exist)
-    //var svgPoints = d3Chart.selectAll('svg').data(data).enter()
-    //var svgPoints = d3Chart.selectAll('svg');
-
-    var svgSpace = d3Chart.select('#svg-space');
-
-    var svgWidth = parseInt(svgSpace.style('width'));
-    var svgHeight = parseInt(svgSpace.style('height'));
-
-    // Data relationships -- links data to svg groups (which may or may not exist already)
-    var svgPoints = svgSpace.selectAll('g').data(this.genTimeline).enter();
-
-
-    // xScale is the generation
-    var xScale = d3.scaleLinear().domain([0, this.year + 10]).range([0, svgWidth]);
-
-    // yScale is the population
-    var yScale = d3.scaleLinear().domain([0, 100]).range([svgHeight, 0]);
-
-    // Create and style the svg points
-    var svgCircle = svgPoints.append('circle')
-        .attr('r', '4')
-        .attr('fill', '#00cc99')
-        .attr('cx', function(d, i) {
-            return xScale(d.year);
-            })
-        .attr('cy', function(d, i) {
-            return yScale(d.pop);
-            })
-
-
-}
-
-var updateChart = function() {
-
-}
 
 
 var chooseGeneration = function(year) {
