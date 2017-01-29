@@ -67,8 +67,8 @@ $(document).ready(function() {
     applySlideoutMenu();
 
      // Create chart object
-     chart = populationChart();
-     chart.initChart();
+     dashboard = consoleDashboard();
+     dashboard.initDashboard();
 
     // Create simulation object
     simulation = Simulation();

@@ -53,7 +53,7 @@ var initChart = function() {
 
     var formatxAxis = d3.format('.0f');
 
-    // text label for the y axis
+    // Text label for the y axis
     this.xAxisLabel = this.svgChart.append("text")
           .attr("transform", "rotate(-90)")
           .attr("y", 15)
@@ -62,13 +62,63 @@ var initChart = function() {
           .style("text-anchor", "middle")
           .text("Population")
 
-
+    // Text label for x axis
     this.yAxisLabel = this.svgChart.append("text")
           .attr("transform",
                 "translate(" + (this.svgWidth/2 + this.margin.left) + " ," +
                                (this.svgHeight + this.margin.top + 40) + ")")
           .style("text-anchor", "middle")
           .text("Generation");
+
+
+    /*****************************/
+    // Initialize console slider
+    /*****************************/
+
+
+var consoleSlider = d3.select("#console-slider");
+    var margin = { right: 50, left: 50 };
+    var width = +popSlider.attr("width") - margin.left - margin.right;
+    var height = +popSlider.attr("height");
+
+
+
+    this.slider = popSlider.append("g")
+        .attr("class", "slider")
+        .attr("transform", "translate(" + margin.left + "," + height / 2 + ")");
+
+    this.slider.append("line")
+        .attr("class", "track")
+        .attr("x1", this.xRange.range()[0])
+        .attr("x2", this.xRange.range()[1])
+      .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-inset")
+      .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track-overlay")
+        .call(d3.drag()
+            //.on("start.interrupt", function() { slider.interrupt(); })
+            .on("start drag", function() { slide(d3.event.x); }));
+
+
+
+    this.slider.insert("g", ".track-overlay")
+        .attr("class", "ticks")
+        .attr("transform", "translate(0," + 18 + ")")
+      .selectAll("text")
+      .data(x.ticks(10))
+      .enter().append("text")
+        .attr("x", x)
+        .attr("text-anchor", "middle")
+        .text(function(d) { return d + "°"; });
+
+    this.handle = slider.insert("circle", ".track-overlay")
+        .attr("class", "handle")
+        .attr("r", 9);
+
+
+    function slide(xPos) {
+      handle.attr("cx", xScale(xPos));
+    }
 
 
 }
@@ -121,9 +171,6 @@ var drawChart = function() {
     // Add the y Axis
 
      this.yAxis.call(d3.axisLeft(yScale));
-
-
-
 
 
 
@@ -182,6 +229,3 @@ var drawChart = function() {
 
 }
 
-function outputUpdate(vol) {
-	document.querySelector('#volume').value = vol;
-}

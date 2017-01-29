@@ -63,7 +63,7 @@
 	<script src="{% static 'game_of_life/script.js' %}"></script>
 	<script src="{% static 'game_of_life/simulation.js' %}"></script>
 	<script src="{% static 'game_of_life/apply-draggabilly.js' %}"></script>
-	<script src="{% static 'game_of_life/population-graph.js' %}"></script>
+	<script src="{% static 'game_of_life/console-dashboard.js' %}"></script>
 	<style>
 
 
@@ -185,17 +185,26 @@
 				</div>
 
 				<div class='col-md-4'>
-					<div id="d3-chart">
-						<svg id="svg-chart" ></svg>
-					</div>
-					<div class="console-stats">
-						<h3>Population: <span id="console-pop">0</span></h3>
-						<h3>Generation: <span id="console-gen">0</span></h3>
-						<h3>Explore Timeline:</h3>
-						<input type="range" min="0" max="100" value="3" id="fader" step="1" oninput="outputUpdate(value)">
-						<output for="fader" id="volume">50</output>
-						<h2>Choose Generation: <input id="choose-gen-input" type="text"></h2>
-						<button id="choose-gen">Submit</button>
+					<div class="console-dashboard">
+						<div id="console-chart">
+							<svg></svg>
+						</div>
+						<div id="console-stats">
+							<div class="row">
+								<div class="col-md-offset-2 col-md-4 pop">
+									<h5>Population: </h5>
+									<h2><span id="console-pop">0</span></h2>
+								</div>
+								<div class="col-md-offset-1 col-md-4">
+									<h5>Generation: </h5>
+									<h2><span id="console-gen">0</span></h2>
+								</div>
+							</div>
+						</div>
+						<div id="console-slider">
+							<h5>Explore Timeline</h5>
+							<svg></svg>
+						</div>
 					</div>
 				</div>
 			</div>

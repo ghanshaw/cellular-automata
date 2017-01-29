@@ -53,7 +53,7 @@ var Simulation = function() {
     obj.pop = 0;
     obj.year = 0;
 
-    obj.chart = chart;
+    obj.dashboard = dashboard;
 
 
     // Drawing methods
@@ -90,13 +90,15 @@ var Simulation = function() {
     obj.sendData = sendData
     obj.freezeConsole = freezeConsole;
     obj.thawConsole = thawConsole;
-    obj.updateStats = updateStats;
+    obj.updateConsole = updateConsole;
 
     obj.chooseGeneration = chooseGeneration;
 
+    obj.maxYear = 0;
+
 
     // --- D3 methods and variables
-    obj.initChart = initChart;
+    obj.initDashboard = initDashboard;
     obj.genTimeline  = [];
     obj.recordHistory = recordHistory;
     obj.eraseHistory = eraseHistory;
@@ -209,6 +211,8 @@ var createWebSocket = function() {
             simulation.year = generation['year'];
 
 
+
+
             // Record population/year to history array
             //simulation.recordHistory();
 
@@ -216,7 +220,7 @@ var createWebSocket = function() {
             simulation.drawGrid();
 
             // Update statistics
-            simulation.updateStats()
+            simulation.updateConsole()
         }
 
         else if (message.clientCommand == 'eraseCanvas') {
@@ -418,29 +422,6 @@ var bindConsoleButtons = function() {
 
     }
 
-
-    // Create draggabilly generation selection button
-    $draggieChooseGen = $('#choose-gen').draggabilly({});
-    $draggieChooseGen.draggabilly('disable');
-
-    $draggieChooseGen.on('staticClick', function(event, pointer) {
-
-        var chooseYear = $('#choose-gen-input').val();
-
-        // If chosen year is less than year active currently
-        if (chooseYear <= simulation.year && chooseYear >= 0) {
-
-            // Pause simulation if it's running
-            if (simulation.isRunning) {
-                simulation.isPaused = true;
-            }
-
-            // Choose simulation
-            simulation.chooseGeneration(chooseYear);
-        }
-
-    })
-
 }
 
 
@@ -540,7 +521,7 @@ var stepSimulation = function() {
     //this.recordHistory();
 
     // Update statistics
-    this.updateStats()
+    this.updateConsole()
 
     // If prediction buffer is too low, add predictions
     if (this.predictions.length <= this.predictionRefresh && !this.isPredicting) {
@@ -768,12 +749,15 @@ var activateCells = function(newCells) {
 }
 
 
-var updateStats = function() {
+var updateConsole = function() {
 
     $('#console-pop').text(this.pop);
     $('#console-gen').text(this.year);
 
-    chart.drawChart();
+    // Update max year
+    this.maxYear = Math.max(this.year, this.maxYear);
+
+    dashboard.drawDashboard();
 
 }
 
