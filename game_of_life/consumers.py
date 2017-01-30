@@ -66,13 +66,16 @@ def ws_receive(message):
 			# Retrieve game (with latest generation)
 			conway = message.channel_session['conway']
 
+			# Erase future
+			conway.erase_future(0)
+
 			# Clear game
 			conway.clear()
 
 			# Create response message
 			message_json = {
-				'content': 'generation',
-				'generation': conway.generation,
+				'content': 'predictions',
+				'predictions': [conway.generation],
 				'clientCommand': message_dict['clientCommand'],
 				'genTimeline': conway.gen_timeline,
 				'order': order
@@ -80,6 +83,7 @@ def ws_receive(message):
 
 			# Empty generations array
 			message.channel_session['generations'] = []
+			message.channel_session['generations'].append(conway.generation)
 
 		elif message_dict['serverCommand'] == 'addPattern':
 

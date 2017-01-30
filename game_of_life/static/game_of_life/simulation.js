@@ -3,44 +3,20 @@
 //*************************************************//
 var Simulation = function() {
 
-    var canvas = document.getElementById("grid");
+
 
     var obj = {};
 
-    obj.ctx = ctx = canvas.getContext("2d");
-    obj.ctxWidth = ctx.canvas.width = $(canvas).width();
-    obj.ctxHeight = ctx.canvas.height = $(canvas).height();
 
-
-    // Infra red
-    //ctx.fillStyle = "#ef476f";
-
-    // Orange-Yellow
-    //ctx.fillStyle = "#FFD166";
-
-    // Carribean Green
-    ctx.fillStyle = "#06D6A0";
-
-    // Slategrey
-    //ctx.fillStyle = "slategrey";
-
-    ctx.strokeStyle = '#ddd';
-
-
-    ctx.beginPath();
 
 
 
 
     /* Some arbitrary constant that determines the approx. length of cell side */
     /* Should change based on the size of the screen */
-    obj.cellSide = 12;
 
-    obj.gridCols = Math.floor(ctx.canvas.width / obj.cellSide);
-    obj.gridRows = Math.floor(ctx.canvas.height / obj.cellSide);
 
-    obj.cellWidth = ctx.canvas.width / obj.gridCols;
-    obj.cellHeight = ctx.canvas.height / obj.gridRows;
+
 
     obj.simSpeed = 'slow';
     obj.predictions = [];
@@ -95,6 +71,8 @@ var Simulation = function() {
     obj.chooseGeneration = chooseGeneration;
 
     obj.maxYear = 0;
+    obj.gridDimensions = gridDimensions;
+    obj.onResize = onResize;
 
 
     // --- D3 methods and variables
@@ -103,6 +81,7 @@ var Simulation = function() {
     obj.recordHistory = recordHistory;
     obj.eraseHistory = eraseHistory;
 
+    obj.clearFuture = clearFuture;
 
     obj.predictionRefresh = 15;
 
@@ -188,19 +167,16 @@ var createWebSocket = function() {
             // Indicate that client is done retrieving predictions
             simulation.isPredicting = false;
 
-
-
-
         }
 
-        else if (message.content == 'generation') {
-
-            // Load single generation into predictions queue
-            simulation.addPredictions([message.generation])
-
-            // Here I should unpause and unfreeze console
-
-        }
+//        else if (message.content == 'generation') {
+//
+//            // Load single generation into predictions queue
+//            simulation.addPredictions([message.generation])
+//
+//            // Here I should unpause and unfreeze console
+//
+//        }
 
         if (message.clientCommand == 'drawGrid') {
 
@@ -223,18 +199,18 @@ var createWebSocket = function() {
             simulation.updateConsole()
         }
 
-        else if (message.clientCommand == 'eraseCanvas') {
-
-            // Apply empty generation
-            simulation.grid = message.generation['grid'];
-            simulation.pop = message.generation['pop'];
-            simulation.year = message.generation['year'];
-
-
-            // Draw grid
-            simulation.drawGrid();
-
-        }
+//else if (message.clientCommand == 'eraseCanvas') {
+//
+//// Apply empty generation
+//simulation.grid = message.generation['grid'];
+//simulation.pop = message.generation['pop'];
+//simulation.year = message.generation['year'];
+//
+//
+//// Draw grid
+//simulation.drawGrid();
+//
+//}
 
         if (simulation.isFrozen) {
             simulation.thawConsole();
@@ -265,6 +241,8 @@ var recordHistory = function() {
 var eraseHistory = function() {
 
     simulation.genTimeline = [];
+
+    simulation.maxYear = 0;
 }
 
 
@@ -455,8 +433,14 @@ var sendData = function(message_data) {
     // Bind console buttons
     this.bindConsoleButtons();
 
+    // Add resize event listener
+    this.onResize();
+
     // Create WebSocket
     this.socket = createWebSocket();
+
+    // Create grid dimensions
+    this.gridDimensions();
 
     // Create canvas background
     this.background = this.drawRowsCols();
@@ -620,8 +604,8 @@ var randomizeSimulation = function() {
         this.isPaused = true;
     }
 
-    // Clear predictions
-    this.predictions = [];
+    // Clear future
+    this.clearFuture();
 
     // Freeze console
     this.freezeConsole();
@@ -633,6 +617,17 @@ var randomizeSimulation = function() {
     }
 
     this.sendData(message_data);
+}
+
+var clearFuture = function() {
+
+    // Clear predictions
+    this.predictions = [];
+
+    // Reset maxYear
+    this.maxYear = this.year;
+
+
 }
 
 
@@ -731,8 +726,8 @@ var eraseCanvas = function() {
 //*************************************************//
 var activateCells = function(newCells) {
 
-    // Empty out predictions
-    this.predictions = [];
+    // Clear future
+    this.clearFuture();
 
     // Freeze console
     this.freezeConsole();
@@ -805,8 +800,8 @@ var addPattern = function(x, y, pattern) {
 
     console.log('Add pattern!');
 
-    // Empty out predictions
-    this.predictions = [];
+    // Clear future
+    this.clearFuture();
 
     // Await predictions
     this.freezeConsole()
@@ -887,5 +882,61 @@ var chooseGeneration = function(year) {
     }
 
     this.sendData(message_data);
+
+}
+
+
+var onResize = function() {
+
+    that = this;
+
+    $(window).on("resize", function() {
+
+        // Update grid dimensions
+        that.gridDimensions();
+
+        // Redraw background
+        that.ctx.background = that.drawRowsCols();
+
+        // Redraw grid
+        that.drawGrid();
+
+    })
+}
+
+var gridDimensions = function() {
+
+    var canvas = document.getElementById("grid");
+
+    this.ctx = ctx = canvas.getContext("2d");
+
+
+
+    // Infra red
+    //ctx.fillStyle = "#ef476f";
+
+    // Orange-Yellow
+    //ctx.fillStyle = "#FFD166";
+
+    // Carribean Green
+    ctx.fillStyle = "#06D6A0";
+
+    // Slategrey
+    //ctx.fillStyle = "slategrey";
+
+    ctx.strokeStyle = '#ddd';
+
+
+    ctx.beginPath();
+
+    this.cellSide = 12;
+
+    this.ctxWidth = ctx.canvas.width = $(canvas).width();
+    this.ctxHeight = ctx.canvas.height = $(canvas).height();
+    this.gridCols = Math.floor(ctx.canvas.width / this.cellSide);
+    this.gridRows = Math.floor(ctx.canvas.height / this.cellSide);
+
+    this.cellWidth = ctx.canvas.width / this.gridCols;
+    this.cellHeight = ctx.canvas.height / this.gridRows;
 
 }

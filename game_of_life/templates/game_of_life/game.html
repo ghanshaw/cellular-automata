@@ -1,5 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
+<head>
+
+	<title>Conway's Game of Life</title>
+
+	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
 	<!-- jQuery -->
 	<script
@@ -23,18 +28,6 @@
 	<link href="https://fonts.googleapis.com/css?family=Orbitron" rel="stylesheet">
 
 
-	<!-- Slideout Plugin -->
-	<script
-			src="{% static 'game_of_life/slideout.min.js' %}"
-			type="text/javascript">
-	</script>
-
-	<link
-			href="{% static 'game_of_life/slideout.css' %}"
-			type="text/css"
-			rel="stylesheet" />
-
-
 	<!-- HammerJS Plugin -->
 	<script
 			src="{% static 'game_of_life/hammer.min.js' %}"
@@ -50,12 +43,6 @@
 	<script
 			src="https://npmcdn.com/draggabilly@2.1/dist/draggabilly.pkgd.min.js">
 	</script>
-
-	<!-- Hamburger CSS -->
-	<link
-			href="{% static 'game_of_life/hamburgers.min.css' %}"
-			type="text/css"
-			rel="stylesheet" />
 
 
 	<!-- Custom Scripts -->
@@ -80,36 +67,26 @@
 
 <body>
 
+    <!--
+            /* (GH) Extra extra small devices (portrait) (phones, less than 480px) */
+
+            /* Extra small devices (phones, less than 768px) */
+
+            /* Small devices (tablets, 768px and up) */
+
+            /* Medium devices (desktops, 992px and up) */
+
+            /* Large devices (large desktops, 1200px and up) */
+        -->
 
 
-<nav id="menu">
-
-	<div class="container">
-
-
-	</div>
-	<header>
-		<h2>Simulacra</h2>
-
-		<ul>
-			<li><a href="#">Game of Life</a></li>
-			<li><a href="#">Sugarscape</a></li>
-			<li><a href="#">Segregation Model</a></li>
-		</ul>
-	</header>
-</nav>
+    <div class="breakpoints">
+        <div class="small"></div>
+        <div class="medium"></div>
+        <div class="large"></div>
+    </div>
 
 
-
-
-
-<main id="panel">
-
-	<button class="toggle-button hamburger hamburger--squeeze" type="button">
-		<span class="hamburger-box">
-    		<span class="hamburger-inner"></span>
-  		</span>
-	</button>
 
 	<section id="section-header">
 		<div class="container">
@@ -317,7 +294,6 @@
 
 	</section>
 
-</main>
 
 </body>
 

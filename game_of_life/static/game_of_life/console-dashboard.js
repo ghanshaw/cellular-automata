@@ -5,8 +5,8 @@ var consoleDashboard = function() {
 
     obj.initDashboard = initDashboard;
     obj.drawDashboard = drawDashboard;
-    obj.updateChart = updateChart;
-    obj.updateSlider = updateSlider;
+    //obj.updateChart = updateChart;
+    //obj.updateSlider = updateSlider;
     obj.svgChart = '';
     obj.svgArea = '';
 
@@ -49,6 +49,7 @@ var initDashboard = function() {
         .append("svg:path")
         .attr("class", "chart-line");
 
+
     // Create x axis (and format)
     this.xAxis = this.svgChart.append('g')
         .attr("transform", "translate(" + this.margin.left + ", " + (this.svgHeight + this.margin.top) + ")")
@@ -75,6 +76,12 @@ var initDashboard = function() {
           .style("text-anchor", "middle")
           .text("Population")
 
+    // Create (and hide) dot for corner cases
+    this.chartPoint = this.svgChart.append('circle')
+        .style('display', 'none')
+        .attr('r', '4')
+        .attr('fill', '#00cc99')
+        .data([0, 0])
 
     /*****************************/
     // Initialize console slider
@@ -95,7 +102,7 @@ var initDashboard = function() {
     this.sliderWidth = sliderWidth;
 
     // xChart of slider
-    this.xSlider = d3.scaleLinear().domain([0, 0]).range([0, sliderWidth]).clamp(true);
+    this.xSlider = d3.scaleLinear().domain([0, 1]).range([0, sliderWidth]);
 
 
     this.slider = this.svgSlider.append("g")
@@ -137,24 +144,33 @@ var initDashboard = function() {
     var handle = this.slider.append("circle")
         .attr("class", "handle")
         .attr("r", 9)
+        .attr("cx", "0")
         .call(d3.drag()
-            .on("start drag", function() {
+            .on("start", function() {
+                this.xPosOld = handle.attr('cx');
+            })
+            .on("drag", function() {
+            console.log(d3.event.x);
+
                 this.dragYear = dragStart(d3.event.x);
+                //console.log(dragYear, xPosOld);
             })
             .on("end", function() {
-                dragEnd(this.dragYear);
+                dragEnd(this.dragYear, this.xPosOld);
             }));
 
     this.handle = handle;
 
 
-    dragEnd = function(dragYear) {
+    dragEnd = function(dragYear, xPosOld) {
 
         // Unpause simulation
         simulation.isPause = false;
 
         // Hide tooltip
         tooltip.style('display', 'none');
+
+        //var dragYear = dragDetails.dragYear;
 
 
         // If chosen year is less than year active currently
@@ -163,10 +179,15 @@ var initDashboard = function() {
             // Choose generation based on dragged year
             simulation.chooseGeneration(dragYear);
         }
+        // Put handle back
+        else {
+            //var xPosOld = this.xPosOld
+            handle.attr('cx', xPosOld);
+            trackOverlay.attr('x2', xPosOld);
+
+        }
 
     }
-
-
 
     dragStart = function (xPos) {
 
@@ -175,8 +196,13 @@ var initDashboard = function() {
             simulation.isPaused = true;
         }
 
+        var dragYear = 0;
 
-        if (xPos >= 0 && xPos <= sliderWidth) {
+        // Put xPos within confines of slider
+        xPos = Math.max(xPos, 0);
+        xPos = Math.min(xPos, sliderWidth)
+
+        //if (xPos >= 0 && xPos <= sliderWidth) {
 
             // Move handle
             handle.attr("cx", xPos);
@@ -185,7 +211,7 @@ var initDashboard = function() {
             trackOverlay.attr("x2", xPos);
 
             // Compute year from handle position
-            this.dragYear = Math.round((xPos/sliderWidth) * simulation.maxYear);
+            dragYear = Math.round((xPos/sliderWidth) * simulation.maxYear);
             //Math.floor(dragYear);
             //console.log(dragYear);
 
@@ -196,12 +222,17 @@ var initDashboard = function() {
                 .style('top', (sliderHeight/2 - 15)+ 'px')
                 .style('display', 'block');
 
-        }
+        //}
 
-        return this.dragYear;
+        return dragYear;
 
     }
 
+    /*****************************/
+    // Draw dashboard
+    /*****************************/
+
+    //this.drawDashboard();
 }
 
 var drawDashboard = function() {
@@ -217,12 +248,6 @@ var drawDashboard = function() {
 
 
 
-    if (data.length == 0) {}
-
-   else if (data.length == 1) {}
-
-   else {
-
     /*****************************/
     // Redraw dashboard chart
     /*****************************/
@@ -231,20 +256,59 @@ var drawDashboard = function() {
     var x_domain_max = simulation.maxYear;
     var xChart = d3.scaleLinear().domain([0, x_domain_max]).range([0, this.svgWidth]).clamp(true);
 
-
     // yChart is the population
     y_domain_max = d3.max(data) * 1.2;
     var yChart = d3.scaleLinear().domain([0,  y_domain_max]).range([this.svgHeight, 0]);
 
+    var translation = "translate(" + this.margin.left + ", " + this.margin.top + ")";
+
+
+    // Make sure dot is hidden
+    this.chartPoint
+        .style('display', 'none')
+     //   .data(data)
+
+    var tickNum = Math.min(data.length - 1, 4);
+
+    if (data.length == 1) {
+
+        xChart = d3.scaleLinear().domain([0, 1]).range([0, this.svgWidth]).clamp(true);
+
+        this.chartPoint
+            .style('display', 'initial')
+            .attr('transform', translation)
+            .data(data)
+            .attr('cx', function(d, i) {
+                console.log(d, i);
+                return xChart(i);
+            })
+            .attr('cy', function(d, i) {
+                console.log(d, i)
+                return yChart(d);
+            })
+
+
+            // If population is 0
+            if (data[0] == 0) {
+                yChart = d3.scaleLinear().domain([0,  1]).range([this.svgHeight, 0]);
+            }
+
+
+
+    }
+
+    if (data.length == 1) { tickNum = 1 }
+
+    //if (data.length == 3) { tickNum = 3 }
 
     // Add the x Axis
     this.xAxis
-        .call(d3.axisBottom(xChart).tickFormat(d3.format(".0f")));
+        .call(d3.axisBottom(xChart).ticks(tickNum).tickFormat(d3.format(".0f")));
 
 
     // Add the y Axis
      this.yAxis
-        .call(d3.axisLeft(yChart));
+        .call(d3.axisLeft(yChart).ticks(tickNum).tickFormat(d3.format(".0f")));
 
 
     // Create line function/object using data
@@ -258,7 +322,7 @@ var drawDashboard = function() {
 
 
     // Update chart line path
-    var translation = "translate(" + this.margin.left + ", " + this.margin.top + ")";
+
 
     this.chartLine.datum(data)
         .attr('d', line)
@@ -278,76 +342,18 @@ var drawDashboard = function() {
         this.sliderMax.text(simulation.maxYear)
 
         // Redefine x scale of slider
-        this.xSlider = this.xChart;
+        //this.xSlider = this.xChart;
 
         var xPos = (simulation.year/simulation.maxYear) * this.sliderWidth;
+
+        if (simulation.maxYear == 0) {
+            this.sliderMax.text(1);
+            xPos = 0;
+        }
+
+
         this.consoleSlider.select('.handle').attr('cx', xPos);
         this.consoleSlider.select('.track-overlay').attr('x2', xPos);
 
 
-    }
-
 }
-
-var updateSlider = function() {
-
-
-
-
-}
-
-var updateChart = function() {
-
-
-
-
-
-}
-
-    // Perform data join, bind incoming data to svg elements (which don't yet exist)
-    //var svgPoints = d3Chart.selectAll('svg').data(data).enter()
-    //var svgPoints = d3Chart.selectAll('svg');
-
-
-        // Create and style the svg points
-//    var svgCircle = svgPoints.append('circle')
-//        .attr('r', '1')
-//        .attr('fill', '#00cc99')
-//        .attr('cx', function(d, i) {
-//            console.log(d, i);
-//            return xChart(i);
-//            })
-//        .attr('cy', function(d, i) {
-//            console.log(d, i);
-//            return yChart(d);
-//            })
-
-//    this.svgArea
-//        .datum(data)
-//        .attr('d', line)
-//        .attr('stroke', "#00cc99")
-//        .attr("fill", "none")
-//        .attr('stroke-width', 2)
-//        .attr('stroke-linecap', 'round')
-//        .attr('stroke-linejoin', 'round')
-
-//    var area = d3.area()
-//        .x(function(d, i) {
-//            return xChart(i)
-//        })
-//        .y1(function(d, i) {
-//            return yChart(d);
-//        })
-//        .y0(yChart(0));
-
-
-//    this.slider.insert("g", ".track-overlay")
-//        .attr("class", "ticks")
-//        .attr("transform", "translate(0," + 18 + ")")
-//        .attr("width", width);
-//      .selectAll("text")
-//      .data(x.ticks(10))
-//      .enter().append("text")
-//        .attr("x", x)
-//        .attr("text-anchor", "middle")
-//        .text(function(d) { return d + "°"; });

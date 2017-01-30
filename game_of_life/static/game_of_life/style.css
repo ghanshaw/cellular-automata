@@ -467,3 +467,41 @@ Console Dashboard
     width: 100%
     height: 300px;
 }
+
+
+/***
+--------------------
+Breakpoints Overlay (for design purposes)
+--------------------
+***/
+
+
+.breakpoints {
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    z-index: 100;
+    display: none
+}
+
+.breakpoints div {
+    height: 100%;
+    width: 2px;
+    position: absolute;
+
+}
+
+.breakpoints .small {
+    left: 768px;
+    background-color: aqua;
+}
+
+.breakpoints .medium {
+    left: 992px;
+    background-color: crimson;
+}
+
+.breakpoints .large {
+    background-color: rebeccapurple;
+    left: 1200px;
+}

@@ -1,26 +1,4 @@
 //*************************************************//
-// Function to apply Slideout menu
-//*************************************************//
-function applySlideoutMenu() {
-
-    // Create Slideout Element
-    var slideout = new Slideout({
-        'panel': document.getElementById('panel'),
-        'menu': document.getElementById('menu'),
-        'padding': 256,
-        'tolerance': 70
-    });
-
-    // Toggle slideout button
-    document.querySelector('.toggle-button').addEventListener('click', function() {
-        slideout.toggle();
-        $(this).toggleClass('is-active');
-    });
-
-}
-
-
-//*************************************************//
 // Class to track edges of a DOM element
 //*************************************************//
 var Edges = function(element) {
@@ -63,9 +41,6 @@ $(document).ready(function() {
     $grid = $('#grid');
 
 
-    // Create menu
-    applySlideoutMenu();
-
      // Create chart object
      dashboard = consoleDashboard();
      dashboard.initDashboard();
@@ -75,7 +50,6 @@ $(document).ready(function() {
 
     // Start simulation
     simulation.startSimulation();
-
 
     // Enable drag/drop, various clicking features
     // Attach events to simulation buttons
