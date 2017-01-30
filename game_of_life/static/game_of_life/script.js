@@ -49,7 +49,7 @@ $(document).ready(function() {
     simulation = Simulation();
 
     // Start simulation
-    simulation.startSimulation();
+    simulation.initSimulation();
 
     // Enable drag/drop, various clicking features
     // Attach events to simulation buttons

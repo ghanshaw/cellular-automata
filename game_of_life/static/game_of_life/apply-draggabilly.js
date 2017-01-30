@@ -3,7 +3,7 @@
 // Draggabilly plugin provide mobile/desktop drag/drop
 // functionality and touch/click functionality
 //*************************************************//
-function applyDraggabilly (simulation){
+function applyDraggabilly (simulation) {
 
 
     //---------------------------------------------------//
@@ -41,11 +41,14 @@ function applyDraggabilly (simulation){
 
         var rowCol = simulation.getRowCol(gridX, gridY);
 
-        var cellId = parseFloat(rowCol.row + '.' + rowCol.col);
-        console.log(cellId);
+        var inBounds = rowCol.row >= 0 && rowCol.row < simulation.gridRows && rowCol.col >= 0 && rowCol.col < simulation.gridCols;
+
+        if (!inBounds) { return; }
+
+        var cellId = rowCol.row + '.' + rowCol.col;
 
         if (!$draggieGrid.setCells.has(cellId)) {
-            $draggieGrid.newCells.push(rowCol);
+            $draggieGrid.newCells.push(cellId);
             $draggieGrid.setCells.add(cellId);
         }
 
@@ -66,13 +69,21 @@ function applyDraggabilly (simulation){
 
         var rowCol = simulation.getRowCol(gridX, gridY);
 
-        var cellId = parseFloat(rowCol.row + '.' + rowCol.col);
-        console.log(cellId);
+        var inBounds = rowCol.row >= 0 && rowCol.row < simulation.gridRows && rowCol.col >= 0 && rowCol.col < simulation.gridCols;
 
-        if (!$draggieGrid.setCells.has(cellId)) {
-            $draggieGrid.newCells.push(rowCol);
-            $draggieGrid.setCells.add(cellId);
+        if (inBounds) {
+
+            var cellId = rowCol.row + '.' + rowCol.col;
+            console.log(cellId);
+
+            if (!$draggieGrid.setCells.has(cellId)) {
+                $draggieGrid.newCells.push(cellId);
+                $draggieGrid.setCells.add(cellId);
+            }
+
         }
+
+
 
         simulation.toggleCell(rowCol.row, rowCol.col, true);
 

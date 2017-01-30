@@ -168,8 +168,10 @@ def ws_receive(message):
 			# Retrieve game (with latest generation)
 			conway = message.channel_session['conway']
 
-			# Retrieve year
+			# Retrieve year, row and col
 			year = message_dict['year']
+			gridRows = message_dict['gridRows']
+			gridCols = message_dict['gridCols']
 
 			# Retrieve generation at specific year
 			# Delete generations from that year forward (including that year)
@@ -183,7 +185,7 @@ def ws_receive(message):
 			conway.generation = gen
 
 			# Randomize board, while preserving year
-			conway.randomize(year)
+			conway.randomize(gridRows, gridCols)
 
 			# Generate predictions
 			conway.predict(30)
@@ -212,9 +214,11 @@ def ws_receive(message):
 			conway = Conway(message_dict['rows'], message_dict['cols'])
 
 			# Add default pattern to Grid
-			center_row = math.floor(message_dict['rows']/2)
-			center_col = math.floor(message_dict['cols']/2)
-			conway.add_pattern(center_row, center_col, 'lightweight spaceship')
+			#center_row = math.floor(message_dict['rows']/2)
+			#center_col = math.floor(message_dict['cols']/2)
+			#conway.add_pattern(center_row, center_col, 'lightweight spaceship')
+			new_cells = {'2.2', '2.4', '2.5', '2.6', '3.2', '3.3', '5.5', '7.7', '9.9'}
+			conway.activate_cells(new_cells)
 
 			# Generate predictions
 			conway.predict(30)
@@ -240,13 +244,21 @@ def ws_receive(message):
 	message.channel_session['conway'] = conway
 
 	# Jsonify Data
-	message_json = DjangoJSONEncoder().encode(message_json)
+	message_json = json.dumps(message_json, default=set_default)
 
 	# Send data to client
 	message.reply_channel.send({
 		"text": message_json,
 	})
 
+	end_time = time()
+	print(str(end_time - start_time) + ' s')
+
+
+def set_default(obj):
+    if isinstance(obj, set):
+        return list(obj)
+    raise TypeError
 
 
 # elif message_dict['serverCommand'] == 'step':

@@ -3,19 +3,10 @@
 //*************************************************//
 var Simulation = function() {
 
-
-
     var obj = {};
-
-
-
-
-
 
     /* Some arbitrary constant that determines the approx. length of cell side */
     /* Should change based on the size of the screen */
-
-
 
 
     obj.simSpeed = 'slow';
@@ -38,7 +29,7 @@ var Simulation = function() {
     obj.eraseCanvas = eraseCanvas;
 
     // Simulation controls
-    obj.startSimulation = startSimulation;
+    obj.initSimulation = initSimulation;
     obj.stepSimulation = stepSimulation;
     obj.runSimulation = runSimulation;
     obj.stopSimulation = stopSimulation;
@@ -78,7 +69,7 @@ var Simulation = function() {
     // --- D3 methods and variables
     obj.initDashboard = initDashboard;
     obj.genTimeline  = [];
-    obj.recordHistory = recordHistory;
+    //obj.recordHistory = recordHistory;
     obj.eraseHistory = eraseHistory;
 
     obj.clearFuture = clearFuture;
@@ -173,7 +164,7 @@ var createWebSocket = function() {
 
             // Retrieve next prediction
             var generation = simulation.predictions.pop();
-            simulation.grid = generation['grid'];
+            simulation.cells = generation['cells'];
             simulation.pop = generation['pop'];
             simulation.year = generation['year'];
 
@@ -202,20 +193,20 @@ var createWebSocket = function() {
 
 
 
-var recordHistory = function() {
-
-    simulation.genTimeline.push({
-        year: this.year,
-        pop: this.pop
-    })
-
-}
+//var recordHistory = function() {
+//
+//    simulation.genTimeline.push({
+//        year: this.year,
+//        pop: this.pop
+//    })
+//
+//}
 
 var eraseHistory = function() {
 
     simulation.genTimeline = [];
-
     simulation.maxYear = 0;
+
 }
 
 
@@ -398,7 +389,7 @@ var sendData = function(message_data) {
 //*************************************************//
 // Initiates simulation
 //*************************************************//
- var startSimulation = function() {
+ var initSimulation = function() {
 
     // Freeze console while loading
     this.freezeConsole();
@@ -467,7 +458,7 @@ var stepSimulation = function() {
 
     // Retrieve next generation from prediction
     var generation = this.predictions.pop()
-    this.grid = generation['grid'];
+    this.cells = generation['cells'];
     this.pop = generation['pop'];
     this.year = generation['year'];
 
@@ -586,6 +577,8 @@ var randomizeSimulation = function() {
     message_data =  {
         'serverCommand': 'randomize',
         'clientCommand': 'drawGrid',
+        'gridRows': this.gridRows,
+        'gridCols': this.gridCols,
         'year': this.year
     }
 
@@ -665,17 +658,20 @@ var drawGrid = function() {
     // Carribean Green
     //this.ctx.fillStyle = "#06D6A0";
 
-    // Draw the grid (row, col)
-    for (var row = 0; row < this.gridRows; row++) {
-        for (var col = 0; col < this.gridCols; col++) {
-            //console.log('(row, col) -->' + [row, col])
-            if (this.grid[row][col]) {
-                // fillRect(x, y, width, height)
-                this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
-            }
+    let cells = this.cells;
 
-        }
-    }
+    for (let cell of cells) {
+
+        var rowCol = cell.split('.');
+        var row = parseInt(rowCol[0]);
+        var col = parseInt(rowCol[1]);
+
+        if (row >= 0 && row < this.gridRows && col >=0 && col < this.gridCols)
+
+        this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
+
+
+    };
 
     this.ctx.drawImage(this.background, 0, 0);
 
@@ -866,13 +862,13 @@ var onResize = function() {
     $(window).on("resize", function() {
 
         // Update grid dimensions
-        that.gridDimensions();
+        //that.gridDimensions();
 
         // Redraw background
-        that.ctx.background = that.drawRowsCols();
+        //that.ctx.background = that.drawRowsCols();
 
         // Redraw grid
-        that.drawGrid();
+        //that.drawGrid();
 
     })
 }
