@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from channels.handler import AsgiHandler
-from .calculation import Conway
+from .conway import Conway
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 from channels.sessions import channel_session, enforce_ordering

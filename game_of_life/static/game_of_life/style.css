@@ -182,7 +182,7 @@ Section - Simulation
 #section-simulation .canvas-wrapper {
     position: relative;
     border: 40px solid grey;
-    border-image-source: url(/static/game_of_life/images/border.svg);
+    border-image-source: url(/static/game_of_life/images/other/border.svg);
     border-image-slice: 33%;
     border-image-width: initial;
     border-image-outset: initial;

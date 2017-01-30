@@ -169,15 +169,6 @@ var createWebSocket = function() {
 
         }
 
-//        else if (message.content == 'generation') {
-//
-//            // Load single generation into predictions queue
-//            simulation.addPredictions([message.generation])
-//
-//            // Here I should unpause and unfreeze console
-//
-//        }
-
         if (message.clientCommand == 'drawGrid') {
 
             // Retrieve next prediction
@@ -187,30 +178,12 @@ var createWebSocket = function() {
             simulation.year = generation['year'];
 
 
-
-
-            // Record population/year to history array
-            //simulation.recordHistory();
-
             // Draw grid
             simulation.drawGrid();
 
             // Update statistics
             simulation.updateConsole()
         }
-
-//else if (message.clientCommand == 'eraseCanvas') {
-//
-//// Apply empty generation
-//simulation.grid = message.generation['grid'];
-//simulation.pop = message.generation['pop'];
-//simulation.year = message.generation['year'];
-//
-//
-//// Draw grid
-//simulation.drawGrid();
-//
-//}
 
         if (simulation.isFrozen) {
             simulation.thawConsole();
@@ -910,29 +883,17 @@ var gridDimensions = function() {
 
     this.ctx = ctx = canvas.getContext("2d");
 
+    this.ctx.beginPath();
 
-
-    // Infra red
-    //ctx.fillStyle = "#ef476f";
-
-    // Orange-Yellow
-    //ctx.fillStyle = "#FFD166";
-
-    // Carribean Green
-    ctx.fillStyle = "#06D6A0";
-
-    // Slategrey
-    //ctx.fillStyle = "slategrey";
-
-    ctx.strokeStyle = '#ddd';
-
-
-    ctx.beginPath();
 
     this.cellSide = 12;
 
     this.ctxWidth = ctx.canvas.width = $(canvas).width();
     this.ctxHeight = ctx.canvas.height = $(canvas).height();
+
+    this.ctx.fillStyle = "#06D6A0";
+    this.ctx.strokeStyle = "#0af1b5";
+
     this.gridCols = Math.floor(ctx.canvas.width / this.cellSide);
     this.gridRows = Math.floor(ctx.canvas.height / this.cellSide);
 
