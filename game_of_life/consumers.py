@@ -217,7 +217,7 @@ def ws_receive(message):
 			#center_row = math.floor(message_dict['rows']/2)
 			#center_col = math.floor(message_dict['cols']/2)
 			#conway.add_pattern(center_row, center_col, 'lightweight spaceship')
-			new_cells = {'2.2', '2.4', '2.5', '2.6', '3.2', '3.3', '5.5', '7.7', '9.9'}
+			new_cells = [(2,2), (2,4), (2,5), (2,6), (3,2), (3,3), (5,5), (7,7), (9,9)]
 			conway.activate_cells(new_cells)
 
 			# Generate predictions

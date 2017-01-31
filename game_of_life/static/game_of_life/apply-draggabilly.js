@@ -48,7 +48,8 @@ function applyDraggabilly (simulation) {
         var cellId = rowCol.row + '.' + rowCol.col;
 
         if (!$draggieGrid.setCells.has(cellId)) {
-            $draggieGrid.newCells.push(cellId);
+            var cell = [rowCol.row, rowCol.col]
+            $draggieGrid.newCells.push(cell);
             $draggieGrid.setCells.add(cellId);
         }
 
@@ -77,7 +78,8 @@ function applyDraggabilly (simulation) {
             console.log(cellId);
 
             if (!$draggieGrid.setCells.has(cellId)) {
-                $draggieGrid.newCells.push(cellId);
+                var cell = [rowCol.row, rowCol.col]
+                $draggieGrid.newCells.push(cell);
                 $draggieGrid.setCells.add(cellId);
             }
 
@@ -112,7 +114,10 @@ function applyDraggabilly (simulation) {
 
     for (var i = 0; i < patterns.length; i++) {
 
-        var $draggiePattern = $(patterns[i]).draggabilly();
+        var $draggiePattern = $(patterns[i]).draggabilly({
+            //grid: [simulation.cellWidth, simulation.cellHeight]
+        });
+
 
         $draggiePattern.on('dragStart', function(event, pointer) {
 
@@ -135,10 +140,12 @@ function applyDraggabilly (simulation) {
         $draggiePattern.on('dragMove', function(event, pointer){
 
             var $pattern = $(event.currentTarget).find('img');
+            var $dropBox = $(event.currentTarget).find('.drop-box');
             var $patternWrapper = $(event.currentTarget);
 
             var gridEdges = Edges($grid);
             var patternEdges = Edges($patternWrapper);
+            var dropBoxEdges = Edges($dropBox);
 
 //            console.log(event.currentTarget);
 //            console.log(pointer);
@@ -146,7 +153,7 @@ function applyDraggabilly (simulation) {
 //            console.log(gridEdges);
 
 
-            if (patternEdges.inBounds(gridEdges)) {
+            if (dropBoxEdges.inBounds(gridEdges)) {
 
                 // If simulation is running and not paused, puase it
                 if (simulation.isRunning && !simulation.isPaused) {
@@ -191,6 +198,7 @@ function applyDraggabilly (simulation) {
         $draggiePattern.on('dragEnd', function(event, pointer) {
 
             var $pattern = $(event.currentTarget).find('img');
+            var $dropBox = $(event.currentTarget).find('.drop-box');
             var $patternWrapper = $(event.currentTarget);
 
             //var patternName
@@ -198,9 +206,10 @@ function applyDraggabilly (simulation) {
 
             var gridEdges = Edges($grid);
             var patternEdges = Edges($pattern);
+            var dropBoxEdges = Edges($dropBox);
 
             // If you drop in bounds and simulation isn't frozen
-            if (patternEdges.inBounds(gridEdges) && !simulation.isFrozen) {
+            if (dropBoxEdges.inBounds(gridEdges) && !simulation.isFrozen) {
 
 
                 // Remove styling, fade element and return it
@@ -211,8 +220,8 @@ function applyDraggabilly (simulation) {
                 });
 
                 // Compute row and column of pattern in grid
-                var y = gridEdges.top - patternEdges.top;
-                var x = gridEdges.left - patternEdges.left;
+                var y = gridEdges.top - dropBoxEdges.top;
+                var x = gridEdges.left - dropBoxEdges.left;
 
                 x = Math.abs(x);
                 y = Math.abs(y);

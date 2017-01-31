@@ -211,6 +211,10 @@ Section - Simulation
     height: 100%;
 }
 
+#section-simulation .grid-dimensions {
+    text-align: right;
+}
+
 #section-simulation .loader {
     width: 50px;
 }
@@ -243,6 +247,10 @@ Console Dashboard
 
 #section-simulation #console-stats {
     margin-top: 20px;
+}
+
+#section-simulation #console-stats small {
+    color: black;
 }
 
 #section-simulation #console-stats .row {
@@ -340,15 +348,30 @@ Console Dashboard
     border: 1px solid rgb(6, 214, 160);
 }
 
+#section-simulation div.drop-box {
+    position: absolute;
+    top: 0;
+    visibility: hidden;
+}
+
+#section-simulation .in-bounds div.drop-box {
+    opacity: .8;
+    box-shadow: 0 0 7px rgb(6, 214, 160);
+    border: 1px solid rgb(6, 214, 160);
+    background-color: rgb(6, 214, 160);
+    visibility: visible;
+}
+
 
 #section-simulation figure div.pattern-wrapper.in-bounds {
     background-color: #06D6A0;
-    opacity: .75;
+    opacity: .5;
 }
 
 
 #section-simulation figure img.in-bounds {
     box-shadow: 0 0 7px rgb(6, 214, 160);
+    display: none;
 }
 
 
@@ -437,13 +460,13 @@ Console Dashboard
   font: 10px sans-serif;
 }
 
-.track,
+.track-outline,
 .track-inset,
 .track-overlay {
   stroke-linecap: round;
 }
 
-.track {
+.track-outline {
   stroke: #000;
   stroke-opacity: 0.3;
   stroke-width: 10px;

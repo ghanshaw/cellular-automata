@@ -7,7 +7,13 @@ var Simulation = function() {
 
     /* Some arbitrary constant that determines the approx. length of cell side */
     /* Should change based on the size of the screen */
+    var canvas = document.getElementById("grid");
 
+    obj.ctx = ctx = canvas.getContext("2d");
+
+    obj.ctx.fillStyle = "#06D6A0";
+    obj.ctx.strokeStyle = "#0af1b5";
+    obj.cellSide = 12;
 
     obj.simSpeed = 'slow';
     obj.predictions = [];
@@ -16,6 +22,7 @@ var Simulation = function() {
     obj.isPredicting = false;
     obj.isFrozen = false;
 
+    obj.updateDropBoxes = updateDropBoxes;
 
     obj.pop = 0;
     obj.year = 0;
@@ -62,7 +69,7 @@ var Simulation = function() {
     obj.chooseGeneration = chooseGeneration;
 
     obj.maxYear = 0;
-    obj.gridDimensions = gridDimensions;
+    obj.updateGridDimensions = updateGridDimensions;
     obj.onResize = onResize;
 
 
@@ -404,10 +411,13 @@ var sendData = function(message_data) {
     this.socket = createWebSocket();
 
     // Create grid dimensions
-    this.gridDimensions();
+    this.updateGridDimensions();
 
     // Create canvas background
     this.background = this.drawRowsCols();
+
+    // Update dimensions of pattern drag and drop boxes
+    this.updateDropBoxes();
 
     // Select initial server speed
     $('#button-' + this.simSpeed).addClass('switched-on');
@@ -657,23 +667,28 @@ var drawGrid = function() {
 
     // Carribean Green
     //this.ctx.fillStyle = "#06D6A0";
+    // Visibile cells on canvas
+    this.visiblePop = 0;
 
     let cells = this.cells;
 
     for (let cell of cells) {
 
-        var rowCol = cell.split('.');
-        var row = parseInt(rowCol[0]);
-        var col = parseInt(rowCol[1]);
+        var row = cell[0];
+        var col = cell[1];
 
-        if (row >= 0 && row < this.gridRows && col >=0 && col < this.gridCols)
+        if (row >= 0 && row < this.gridRows && col >=0 && col < this.gridCols) {
 
-        this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
+            this.ctx.fillRect(col * this.cellWidth, row * this.cellHeight, this.cellWidth, this.cellHeight);
+            this.visiblePop += 1;
 
+        }
 
     };
 
     this.ctx.drawImage(this.background, 0, 0);
+
+
 
     var drawEnd = performance.now();
     console.log('Draw Time: ' + (drawEnd - drawStart) + 'ms')
@@ -718,9 +733,12 @@ var updateConsole = function() {
     $('#console-pop').text(this.pop);
     $('#console-gen').text(this.year);
 
+    $('#console-pop-visible').text("(" + this.visiblePop + ")");
+
     // Update max year
     this.maxYear = Math.max(this.year, this.maxYear);
 
+    //
     dashboard.drawDashboard();
 
 }
@@ -854,6 +872,27 @@ var chooseGeneration = function(year) {
 
 }
 
+var updateDropBoxes = function() {
+
+
+
+    let drop_boxes = document.getElementsByClassName('drop-box');
+
+    var that = this;
+
+    for (let box of drop_boxes) {
+
+        var patternRows = $(box).attr('data-pattern-rows');
+        var patternCols = $(box).attr('data-pattern-cols');
+
+
+        $(box).height(patternRows * that.cellHeight);
+        $(box).width(patternCols * that.cellWidth);
+
+    }
+
+}
+
 
 var onResize = function() {
 
@@ -861,39 +900,58 @@ var onResize = function() {
 
     $(window).on("resize", function() {
 
+        var canvasWidth = $("canvas#grid").width();
+        var canvasHeight = $("canvas#grid").height()
+
+      //  if (canvasWidth != that.ctxWidth || canvasHeight != that.ctxHeight) {
+
+        console.log($('#grid').width());
+
         // Update grid dimensions
-        //that.gridDimensions();
+        that.updateGridDimensions();
 
         // Redraw background
-        //that.ctx.background = that.drawRowsCols();
+        that.ctx.background = that.drawRowsCols();
+
+        // Create canvas background
+        that.background = that.drawRowsCols();
+
 
         // Redraw grid
-        //that.drawGrid();
+        that.drawGrid();
+
+
+        // Update Console
+        that.updateConsole();
+
+        // Update pattern drop boxes
+        that.updateDropBoxes();
+
 
     })
 }
 
-var gridDimensions = function() {
-
-    var canvas = document.getElementById("grid");
-
-    this.ctx = ctx = canvas.getContext("2d");
+var updateGridDimensions = function() {
 
     this.ctx.beginPath();
 
+    this.ctxWidth = ctx.canvas.width = $("canvas#grid").width();
+    this.ctxHeight = ctx.canvas.height = $("canvas#grid").height();
 
-    this.cellSide = 12;
-
-    this.ctxWidth = ctx.canvas.width = $(canvas).width();
-    this.ctxHeight = ctx.canvas.height = $(canvas).height();
-
+    // Context colors are reset when width/height is changed
     this.ctx.fillStyle = "#06D6A0";
     this.ctx.strokeStyle = "#0af1b5";
 
     this.gridCols = Math.floor(ctx.canvas.width / this.cellSide);
     this.gridRows = Math.floor(ctx.canvas.height / this.cellSide);
+    this.gridArea = this.gridCols * this.gridRows;
 
     this.cellWidth = ctx.canvas.width / this.gridCols;
     this.cellHeight = ctx.canvas.height / this.gridRows;
+
+    // Display grid dimensions
+    $("#grid-rows").text(this.gridRows.toLocaleString());
+    $("#grid-cols").text(this.gridCols.toLocaleString());
+    $("#grid-area").text(this.gridArea.toLocaleString());
 
 }

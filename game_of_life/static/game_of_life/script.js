@@ -16,11 +16,11 @@ var Edges = function(element) {
         bottom: bottom
     }
 
-    // inBound method evaluates whether element a is within the bounds of element b
+    // inBounds method evaluates whether element a is within the bounds of element b
     // ex: a.inBound(edgesB) returns true if a is within b
     edges.inBounds = function(outer) {
 
-        return top > outer.top && left > outer.left && right < outer.right && bottom < outer.bottom;
+        return top > outer.top && left > outer.left && right <= (outer.right + simulation.cellWidth) && bottom <= (outer.bottom + simulation.cellHeight);
 
     }
 

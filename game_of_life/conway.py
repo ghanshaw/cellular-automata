@@ -40,11 +40,10 @@ class Conway():
 		expand_factor = 1.2;
 		self.generation['cells'].clear();
 
-		for i in range(math.floor(gridRows * expand_factor)):
-			for j in range(math.floor(gridCols * expand_factor)):
+		for r in range(math.floor(gridRows * expand_factor)):
+			for c in range(math.floor(gridCols * expand_factor)):
 				if randint(0, 1):
-					cell_id = str(i) + '.' + str(j)
-					self.generation['cells'].add(cell_id)
+					self.generation['cells'].add((r, c))
 
 		self.generation['pop'] = len(self.generation['cells'])
 		self.record_history()
@@ -57,10 +56,7 @@ class Conway():
 
 		for cell in iter(self.generation['cells']):
 
-			#cell = str(cell)
-			row, col = cell.split('.')
-			row = int(row)
-			col = int(col)
+			row, col = cell
 
 			moore_neighborhood = [
 				(row - 1, col - 1),
@@ -74,8 +70,7 @@ class Conway():
 			]
 
 			for r, c in moore_neighborhood:
-				moore_cell = str(r) + '.' + str(c)
-				moore_total[moore_cell] += 1
+				moore_total[(r, c)] += 1
 
 		living_cells = set()
 
@@ -129,17 +124,12 @@ class Conway():
 
 		for cell in pattern_cells:
 
-			cell = str(cell)
-			row, col = cell.split('.')
-
-			row = int(row)
-			col = int(col)
+			row, col = cell
 
 			row += row_offset
 			col += col_offset
 
-			cell = str(row) + '.' + str(col)
-			self.generation['cells'].add(cell)
+			self.generation['cells'].add((row, col))
 
 		self.generation['pop'] = len(self.generation['cells'])
 		self.record_history()
@@ -170,7 +160,7 @@ class Conway():
 	def activate_cells(self, new_cells):
 
 		for cell in new_cells:
-			self.generation['cells'].add(cell)
+			self.generation['cells'].add(tuple(cell))
 
 		self.generation['pop'] = len(self.generation['cells'])
 		self.record_history()

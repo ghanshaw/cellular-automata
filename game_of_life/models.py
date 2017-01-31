@@ -9,6 +9,8 @@ class Pattern(models.Model):
 	src_root = models.CharField(max_length=100)
 	file_type = models.CharField(max_length=10)
 	src = models.CharField(max_length=200)
+	rows = models.IntegerField(default=0);
+	columns = models.IntegerField(default=0);
 
 	def src(self):
 		return self.src_root + self.name + '.' + self.file_type

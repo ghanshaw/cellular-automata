@@ -159,6 +159,7 @@
 						<div class="loader-wrapper"><img class="loader" src="{% static 'game_of_life/images/other/loader.gif' %}" alt="" draggable="false"></div>
 						<canvas id="grid"></canvas>
 					</div>
+					<div class="grid-dimensions"><h5>Rows: <span id="grid-rows">-</span> | Columns: <span id="grid-cols">-</span> | Visible Cells: <span id="grid-area">-</span></h5></div>
 				</div>
 
 				<div class='col-md-4'>
@@ -168,11 +169,11 @@
 						</div>
 						<div id="console-stats">
 							<div class="row">
-								<div class="col-md-offset-2 col-md-4 pop">
-									<h5>Population: </h5>
-									<h2><span id="console-pop">0</span></h2>
+								<div class="col-md-offset-1 col-md-5 pop">
+									<h5>Population <small>(Visible)</small>: </h5>
+									<h2><span id="console-pop">0</span> <small id="console-pop-visible"></small></h2>
 								</div>
-								<div class="col-md-offset-1 col-md-4">
+								<div class="col-md-offset-1 col-md-5">
 									<h5>Generation: </h5>
 									<h2><span id="console-gen">0</span></h2>
 								</div>
@@ -213,7 +214,8 @@
 					{% for pattern in still_lifes %}
 					<figure>
 						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
-							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false" />
+							 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}</figcaption>
@@ -229,6 +231,7 @@
 					<figure>
 						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
 							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+							 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}<br><small>(period {{ pattern.period }})</small></figcaption>
@@ -250,6 +253,7 @@
 					<figure>
 						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
 							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+							 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}</figcaption>
@@ -265,6 +269,7 @@
 					<figure>
 						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
 							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
+							 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
 						 </div>
 						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
 						<figcaption>{{ pattern.name|title }}</figcaption>
