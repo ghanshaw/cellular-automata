@@ -93,6 +93,8 @@ var initDashboard = function() {
         .attr("class", "track track-inset")
       .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
         .attr("class", "track track-overlay")
+      .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
+        .attr("class", "track track-target")
 
     this.sliderMin = this.slider.append('text')
         .attr('font-size', '15px')
@@ -116,7 +118,7 @@ var initDashboard = function() {
         .style('display', 'none');
 
 
-    var handle = this.slider.append("circle")
+    var handle = this.slider.insert("circle", '.track-target')
         .attr("class", "handle")
         .attr("r", 9)
         .attr("cx", "0")
@@ -281,12 +283,25 @@ var drawDashboard = function() {
              .attr("x2", xSlider.range()[1])
 
 
-         this.handle
+
+        var trackOverlay = this.trackOverlay;
+        var tooltip = this.tooltip;
+        var handle = this.handle;
+
+        var trackTarget = this.slider.select('.track-target');
+
+        // Expand target slightly
+        trackTarget
+            .attr('x1', xSlider.range()[0] - 10)
+            .attr('x2', xSlider.range()[1] + 10)
+
+        trackTarget
                  .call(d3.drag()
             .on("start", function() {
                 this.xPosOld = handle.attr('cx');
+
             })
-            .on("drag", function() {
+            .on("start drag", function() {
             console.log(d3.event.x);
 
                 this.dragYear = drag(d3.event.x);
@@ -314,9 +329,7 @@ var drawDashboard = function() {
         this.consoleSlider.select('.handle').attr('cx', xPos);
         this.consoleSlider.select('.track-overlay').attr('x2', xPos);
 
-        var trackOverlay = this.trackOverlay;
-        var tooltip = this.tooltip;
-        var handle = this.handle;
+
 
         drag = function (xPos) {
 

@@ -13,7 +13,7 @@ var Simulation = function() {
 
     obj.ctx.fillStyle = "#06D6A0";
     obj.ctx.strokeStyle = "#0af1b5";
-    obj.cellSide = 12;
+    obj.cellSide = 10;
 
     obj.simSpeed = 'slow';
     obj.predictions = [];
@@ -26,8 +26,11 @@ var Simulation = function() {
 
     obj.pop = 0;
     obj.year = 0;
+    obj.cells = []
 
     obj.dashboard = dashboard;
+
+
 
 
     // Drawing methods
@@ -78,6 +81,8 @@ var Simulation = function() {
     obj.genTimeline  = [];
     //obj.recordHistory = recordHistory;
     obj.eraseHistory = eraseHistory;
+
+    obj.processNextPrediction = processNextPrediction;
 
     obj.clearFuture = clearFuture;
 
@@ -156,6 +161,7 @@ var createWebSocket = function() {
         }
 
         simulation.genTimeline = message.genTimeline;
+        simulation.limit = message.limit;
 
         if (message.content == 'predictions') {
 
@@ -169,19 +175,31 @@ var createWebSocket = function() {
 
         if (message.clientCommand == 'drawGrid') {
 
-            // Retrieve next prediction
-            var generation = simulation.predictions.pop();
-            simulation.cells = generation['cells'];
-            simulation.pop = generation['pop'];
-            simulation.year = generation['year'];
+            simulation.processNextPrediction();
 
 
-            // Draw grid
-            simulation.drawGrid();
-
-            // Update statistics
-            simulation.updateConsole()
+//            // Retrieve next prediction
+//            var generation = simulation.predictions.pop();
+//            simulation.cells = generation['cells'];
+//            simulation.pop = generation['pop'];
+//            simulation.year = generation['year'];
+//
+//
+//            // Draw grid
+//            simulation.drawGrid();
+//
+//            // Update statistics
+//            simulation.updateConsole()
         }
+
+//        if (message.limitReached) {
+//
+//            simulation.max_year = message.limitReached.year;
+//            simulation.max_param = message.limitReached.max.param;
+//
+//        }
+//
+
 
         if (simulation.isFrozen) {
             simulation.thawConsole();
@@ -198,6 +216,67 @@ var createWebSocket = function() {
 
 }
 
+var processNextPrediction = function() {
+
+
+    // Retrieve next prediction
+    var generation = this.predictions.pop();
+    this.cells = generation['cells'];
+    this.pop = generation['pop'];
+    this.year = generation['year'];
+
+
+    // Draw grid
+    this.drawGrid();
+
+    // Update statistics
+    this.updateConsole()
+
+    // If you encounter the limit year
+    if (this.year == this.limit.year) {
+
+        if (this.limit.param == 'year') {
+            $(".limit-year").show();
+            $(".limit-population").hide();
+        }
+        else if (this.limit.param == 'population') {
+            $(".limit-year").hide();
+            $(".limit-population").show();
+        }
+
+        // Stop running of simulation
+        this.isRunning = false;
+
+        // Reveal limit message
+        $('.console-limit').fadeIn();
+        $('.console-limit').css('display', 'flex');
+
+        // Freeze console buttons
+        $('.console-freezable').addClass('frozen');
+
+        // Indicate that is reached
+        this.atLimit = true;
+        return;
+
+    }
+    // Otherwise, if it isn't limit year, but was before
+    else if (this.atLimit) {
+
+        // Hide limit message
+        $('.console-limit').fadeOut();
+
+        // Unfreeze buttons
+        $('.console-freezable').removeClass('frozen');
+
+        this.atLimit = false;
+
+    }
+
+
+
+    this.atLimit = false;
+
+}
 
 
 //var recordHistory = function() {
@@ -404,9 +483,6 @@ var sendData = function(message_data) {
     // Bind console buttons
     this.bindConsoleButtons();
 
-    // Add resize event listener
-    this.onResize();
-
     // Create WebSocket
     this.socket = createWebSocket();
 
@@ -419,10 +495,20 @@ var sendData = function(message_data) {
     // Update dimensions of pattern drag and drop boxes
     this.updateDropBoxes();
 
+    // Add resize event listener
+    this.onResize();
+
+
+
     // Select initial server speed
     $('#button-' + this.simSpeed).addClass('switched-on');
 
     var sim = this;
+
+    // Bind dashboard reveal to resizing
+    $('#collapseDashboard').on('shown.bs.collapse', function () {
+        sim.updateConsole();
+    })
 
     // Proceed when WebSocket finishes opening
     this.socket.addEventListener('open', function(event){
@@ -431,7 +517,7 @@ var sendData = function(message_data) {
         message_data =  {
             'cols':  sim.gridCols,
             'rows': sim.gridRows,
-            'serverCommand': 'initGrid',
+            'serverCommand': 'initConway',
             'clientCommand': 'drawGrid'
         }
 
@@ -458,6 +544,10 @@ var stepSimulation = function() {
     // If grid is empty, do nothing
     if (this.pop == 0) { return; }
 
+    // If simulation is at it's limit, do nothing
+    if (this.atLimit) { return; }
+
+
     // If no predictions are available, wait for new ones to come from server
     else if (this.predictions.length == 0) {
         this.isPaused = true;
@@ -466,23 +556,26 @@ var stepSimulation = function() {
         return;
     }
 
-    // Retrieve next generation from prediction
-    var generation = this.predictions.pop()
-    this.cells = generation['cells'];
-    this.pop = generation['pop'];
-    this.year = generation['year'];
+//    // Retrieve next generation from prediction
+//    var generation = this.predictions.pop()
+//    this.cells = generation['cells'];
+//    this.pop = generation['pop'];
+//    this.year = generation['year'];
+//
+//    // Draw grid
+//    this.drawGrid();
+//
+//    // Record history
+//    //this.recordHistory();
+//
+//    // Update statistics
+//    this.updateConsole()
 
-    // Draw grid
-    this.drawGrid();
-
-    // Record history
-    //this.recordHistory();
-
-    // Update statistics
-    this.updateConsole()
+    // Process the next prediction
+    this.processNextPrediction();
 
     // If prediction buffer is too low, add predictions
-    if (this.predictions.length <= this.predictionRefresh && !this.isPredicting) {
+    if (this.predictions.length <= this.predictionRefresh && !this.isPredicting && !this.atLimit) {
 
         console.log('Get predictions!');
 
@@ -661,7 +754,7 @@ var drawRowsCols = function() {
 var drawGrid = function() {
 
     var drawStart = performance.now();
-
+    
     // Clear canvas
     this.eraseCanvas();
 
@@ -876,7 +969,7 @@ var updateDropBoxes = function() {
 
 
 
-    let drop_boxes = document.getElementsByClassName('drop-box');
+    let drop_boxes = Array.from(document.getElementsByClassName('drop-box'));
 
     var that = this;
 
@@ -926,6 +1019,12 @@ var onResize = function() {
 
         // Update pattern drop boxes
         that.updateDropBoxes();
+
+        // If windows size is medium+, show dashboard
+        if (window.outerWidth > 992) {
+            $('#collapseDashboard').collapse('show');
+        }
+
 
 
     })

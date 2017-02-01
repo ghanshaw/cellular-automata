@@ -4,7 +4,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 import json
 from collections import Counter
 import copy
-import time
+from time import time
 from collections import defaultdict
 import math
 
@@ -27,10 +27,35 @@ class Conway():
 		}
 
 		self.gen_timeline = []
+		self.max_year = 50
+		self.max_pop = 100
+		self.limit = {
+			'year': -1,
+			'param': None
+		}
 
 
 		self.predictions = []
 		#self.make_generation(rows, cols)
+
+	def check_limit(self):
+		# Limit has been reached already
+		if self.limit['year'] != -1:
+			return
+
+		# Check if limit has been reached
+		if self.generation['year'] >= self.max_year:
+			self.limit['param'] = 'year'
+			self.limit['year'] = self.generation['year']
+		elif self.generation['pop'] >= self.max_pop:
+			self.limit['param'] = 'population'
+			self.limit['year'] = self.generation['year']
+		# else:
+		# 	self.limit = {
+		# 		'year': -1,
+		# 		'param': None
+		# 	}
+		# return False
 
 
 
@@ -47,6 +72,7 @@ class Conway():
 
 		self.generation['pop'] = len(self.generation['cells'])
 		self.record_history()
+		self.check_limit()
 
 
 	# Step through another generations
@@ -93,10 +119,11 @@ class Conway():
 
 		# Record history
 		self.record_history()
+		self.check_limit()
 
 
 	def predict(self, num=10):
-
+		start_time = time()
 		# Delete existing predictions
 		del self.predictions
 		self.predictions = []
@@ -108,6 +135,9 @@ class Conway():
 			self.step()
 			self.append_prediction()
 
+		end_time = time()
+		print('Predict Time: ' + str(end_time - start_time) + ' s')
+
 
 	# Append current generation to predictions list
 	def append_prediction(self):
@@ -117,14 +147,25 @@ class Conway():
 	def add_pattern(self, row_offset, col_offset, pattern):
 
 		pattern_cells = Pattern.objects.get(name=pattern)
-		#print(pattern_matrix.cells)
+		rows = pattern_cells.rows
+		columns = pattern_cells.columns
 		pattern_cells = json.JSONDecoder().decode(pattern_cells.cells)
 
-		#print('(rows, col)' + str((self.rows, self.cols)))
+		# Clear space first
+		for i in range(rows):
+			for j in range(columns):
 
-		for cell in pattern_cells:
+				row = i + row_offset
+				col = j + col_offset
 
-			row, col = cell
+				cell = (row, col)
+
+				# If cell is alive in generation, kill it
+				if cell in self.generation['cells']:
+					self.generation['cells'].remove(cell)
+
+		# Add cells in pattern to generation
+		for row, col in pattern_cells:
 
 			row += row_offset
 			col += col_offset
@@ -133,6 +174,7 @@ class Conway():
 
 		self.generation['pop'] = len(self.generation['cells'])
 		self.record_history()
+		self.check_limit()
 		return
 
 	def record_history(self):
@@ -153,9 +195,15 @@ class Conway():
 		return
 
 	def erase_future(self, year):
+
 		del self.gen_timeline[year:]
 
-
+		# If the limit is known and in the future, discard it (that future is null now)
+		if self.limit['year'] >= year:
+			self.limit = {
+				'year': -1,
+				'param': None
+			}
 
 	def activate_cells(self, new_cells):
 
@@ -164,10 +212,10 @@ class Conway():
 
 		self.generation['pop'] = len(self.generation['cells'])
 		self.record_history()
+		self.check_limit()
 		return
 
 	def clear(self):
-
 		self.generation['cells'].clear()
 		self.generation['year'] = 0
 		self.generation['pop'] = 0

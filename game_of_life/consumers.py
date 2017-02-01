@@ -25,16 +25,45 @@ def ws_receive(message):
 
 	order = message.content['order']
 
+	# Intialize game
+	if message_dict['serverCommand'] == 'initConway':
 
-	if 'generations' in message.channel_session:
+			# Create generations array
+			message.channel_session['generations'] = []
 
+			# Initialize Grid object
+			conway = Conway(message_dict['rows'], message_dict['cols'])
+
+			# Add default pattern to Grid
+			center_row = math.floor(message_dict['rows']/2)
+			center_col = math.floor(message_dict['cols']/2)
+			conway.add_pattern(center_row, center_col, 'lightweight spaceship')
+			# new_cells = [(2,2), (2,4), (2,5), (2,6), (3,2), (3,3), (5,5), (7,7), (9,9)]
+			# conway.activate_cells(new_cells)
+
+			# Generate predictions
+			conway.predict(30)
+
+			# Create response message
+			message_json = {
+				'content': 'predictions',
+				'predictions': conway.predictions,
+				'clientCommand': message_dict['clientCommand'],
+				'genTimeline': conway.gen_timeline,
+				'limit': conway.limit,
+				'order': order
+			}
+
+			# Add generation to generations array
+			message.channel_session['generations'].extend(conway.predictions)
+
+	elif 'generations' in message.channel_session:
+
+		# Retrieve variables from session
 		generations = message.channel_session['generations']
-		# start_time = message.channel_session['start_time']
+		conway = message.channel_session['conway']
 
 		if message_dict['serverCommand'] == 'getPredictions':
-
-			# Retrieve game (with latest generation)
-			conway = message.channel_session['conway']
 
 			# Retrieve year
 			year = int(message_dict['year'])
@@ -47,24 +76,21 @@ def ws_receive(message):
 				conway.predict(num_predictions)
 
 				# Delete last year from generations array
-				del message.channel_session['generations'][-1]
+				del generations[-1]
 
 				# Add generations to generations array
-				message.channel_session['generations'].extend(conway.predictions)
+				generations.extend(conway.predictions)
 
 			message_json = {
 				'content': 'predictions',
 				'predictions': generations[year:year + 30],
 				'clientCommand': message_dict['clientCommand'],
 				'genTimeline': conway.gen_timeline,
+				'limit': conway.limit,
 				'order': order
 			}
 
-
 		elif message_dict['serverCommand'] == 'clear':
-
-			# Retrieve game (with latest generation)
-			conway = message.channel_session['conway']
 
 			# Erase future
 			conway.erase_future(0)
@@ -78,6 +104,7 @@ def ws_receive(message):
 				'predictions': [conway.generation],
 				'clientCommand': message_dict['clientCommand'],
 				'genTimeline': conway.gen_timeline,
+				'limit': conway.limit,
 				'order': order
 			}
 
@@ -87,9 +114,6 @@ def ws_receive(message):
 
 		elif message_dict['serverCommand'] == 'addPattern':
 
-			# Retrieve game (with latest generation)
-			conway = message.channel_session['conway']
-
 			# Retrieve pattern and placement from message
 			row = message_dict['row']
 			col = message_dict['col']
@@ -98,8 +122,8 @@ def ws_receive(message):
 
 			# Retrieve generation at specific year
 			# Delete generations from that year forward (including that year)
-			gen = message.channel_session['generations'][year]
-			del message.channel_session['generations'][year:]
+			gen = generations[year]
+			del generations[year:]
 
 			# Erase future
 			conway.erase_future(year)
@@ -119,16 +143,14 @@ def ws_receive(message):
 				'predictions': conway.predictions,
 				'clientCommand': message_dict['clientCommand'],
 				'genTimeline': conway.gen_timeline,
+				'limit': conway.limit,
 				'order': order
 			}
 
 			# Add generations to generations array
-			message.channel_session['generations'].extend(conway.predictions)
+			generations.extend(conway.predictions)
 
 		elif message_dict['serverCommand'] == 'activateCells':
-
-			# Retrieve game (with latest generation)
-			conway = message.channel_session['conway']
 
 			# Retrieve array of new cells, and year
 			new_cells = message_dict['newCells']
@@ -136,8 +158,8 @@ def ws_receive(message):
 
 			# Retrieve generation at specific year
 			# Delete generations from that year forward (including that year)
-			gen = message.channel_session['generations'][year]
-			del message.channel_session['generations'][year:]
+			gen = generations[year]
+			del generations[year:]
 
 			# Erase future
 			conway.erase_future(year)
@@ -157,16 +179,14 @@ def ws_receive(message):
 				'predictions': conway.predictions,
 				'clientCommand': message_dict['clientCommand'],
 				'genTimeline': conway.gen_timeline,
+				'limit': conway.limit,
 				'order': order
 			}
 
 			# Add generations to generations array
-			message.channel_session['generations'].extend(conway.predictions)
+			generations.extend(conway.predictions)
 
 		elif message_dict['serverCommand'] == 'randomize':
-
-			# Retrieve game (with latest generation)
-			conway = message.channel_session['conway']
 
 			# Retrieve year, row and col
 			year = message_dict['year']
@@ -175,8 +195,8 @@ def ws_receive(message):
 
 			# Retrieve generation at specific year
 			# Delete generations from that year forward (including that year)
-			gen = message.channel_session['generations'][year]
-			del message.channel_session['generations'][year:]
+			gen = generations[year]
+			del generations[year:]
 
 			# Erase future
 			conway.erase_future(year)
@@ -196,52 +216,25 @@ def ws_receive(message):
 				'predictions': conway.predictions,
 				'clientCommand': message_dict['clientCommand'],
 				'genTimeline': conway.gen_timeline,
+				'limit': conway.limit,
 				'order': order
 			}
 
 			# Add generations to generations array
-			message.channel_session['generations'].extend(conway.predictions)
+			generations.extend(conway.predictions)
 
-
-
-	else:
-		if message_dict['serverCommand'] == 'initGrid':
-
-			# Create generations array
-			message.channel_session['generations'] = []
-
-			# Initialize Grid object
-			conway = Conway(message_dict['rows'], message_dict['cols'])
-
-			# Add default pattern to Grid
-			#center_row = math.floor(message_dict['rows']/2)
-			#center_col = math.floor(message_dict['cols']/2)
-			#conway.add_pattern(center_row, center_col, 'lightweight spaceship')
-			new_cells = [(2,2), (2,4), (2,5), (2,6), (3,2), (3,3), (5,5), (7,7), (9,9)]
-			conway.activate_cells(new_cells)
-
-			# Generate predictions
-			conway.predict(30)
-
-			# Create response message
-			message_json = {
-				'content': 'predictions',
-				'predictions': conway.predictions,
-				'clientCommand': message_dict['clientCommand'],
-				'genTimeline': conway.gen_timeline,
-				'order': order
-			}
-
-			# Add generation to generations array
-			message.channel_session['generations'].extend(conway.predictions)
-
-
-	# Add grid to session
-
+	# Sanity check: confirm that conway and session are at same year
 	assert len(conway.gen_timeline) == len(message.channel_session['generations'])
-
-	message.channel_session['start_time'] = start_time
+	
+	# Update session with latest version of conway
 	message.channel_session['conway'] = conway
+
+	# # If limit reached, inform client
+	# if conway.limit_reached():
+	# 	message_json['limit'] = {
+	# 		'year': conway.limit_year,
+	# 		'param': conway.limit_param
+	# 	}
 
 	# Jsonify Data
 	message_json = json.dumps(message_json, default=set_default)
@@ -252,21 +245,28 @@ def ws_receive(message):
 	})
 
 	end_time = time()
-	print(str(end_time - start_time) + ' s')
+	print('Consumers.py time : ' +  str(end_time - start_time) + ' s')
 
 
+# Helper function to jsonify sets
 def set_default(obj):
-    if isinstance(obj, set):
-        return list(obj)
-    raise TypeError
+	if isinstance(obj, set):
+		return list(obj)
+	raise TypeError
 
-
-# elif message_dict['serverCommand'] == 'step':
-# 	step_enter = time()
-# 	grid.step()
-# 	step_leave = time()
-# 	print('Step Time: ', step_leave - step_enter)
+# def limit_reached(conway, generations, year, order):
 #
-# elif message_dict['serverCommand'] == 'random':
-# 	print('Command: Random Grid')
-# 	grid.random()
+# 	message_json = {
+# 		'content': 'predictions',
+# 		'predictions': generations[year:year + 30],
+# 		'clientCommand': 'limitReached',
+# 		'genTimeline': conway.gen_timeline,
+# 		'order': order,
+# 		'limit': conway.limit
+# 	}
+
+
+
+
+
+
