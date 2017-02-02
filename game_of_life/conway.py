@@ -36,7 +36,7 @@ class Conway():
 
 
 		self.predictions = []
-		#self.make_generation(rows, cols)
+
 
 	def check_limit(self):
 		# Limit has been reached already
