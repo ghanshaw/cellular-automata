@@ -22,13 +22,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY')
+#SECRET_KEY = '62n(z53tc5ec(nud(h2qv*==c)5)$59!9!e*bvpzd==+$xf9_p'
+#SECRET_KEY = 'a16_52f-j2txj5$$4(_s5ybd)*bdz2tc-ms9qru6aiq7qe)hha'
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = [
     # '192.168.1.2',
     '127.0.0.1',
+    '0.0.0.0'
     # '192.168.1.8'
 ]
 
@@ -101,9 +105,20 @@ DATABASES['default'].update(db_from_env)
 
 # Channels
 
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "asgiref.inmemory.ChannelLayer",
+#         "ROUTING": "simulacra.routing.channel_routing",
+#     },
+# }
+
+
 CHANNEL_LAYERS = {
     "default": {
-        "BACKEND": "asgiref.inmemory.ChannelLayer",
+        "BACKEND": "asgi_redis.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [os.environ.get('REDIS_URL', 'redis://localhost:6379')],
+        },
         "ROUTING": "simulacra.routing.channel_routing",
     },
 }

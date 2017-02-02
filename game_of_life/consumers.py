@@ -11,10 +11,9 @@ import math
 
 
 def ws_connect(message):
-	print('Just connected')
-	message.reply_channel.send({
-		"text": '',
-	})
+    message.reply_channel.send({
+        'accept': True
+})
 
 
 
