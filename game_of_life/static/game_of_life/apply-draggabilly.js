@@ -155,7 +155,7 @@ function applyDraggabilly (simulation) {
 
             if (dropBoxEdges.inBounds(gridEdges)) {
 
-                // If simulation is running and not paused, puase it
+                // If simulation is running and not paused, pause it
                 if (simulation.isRunning && !simulation.isPaused) {
 
                     simulation.isPaused = true;
@@ -207,9 +207,11 @@ function applyDraggabilly (simulation) {
             var gridEdges = Edges($grid);
             var patternEdges = Edges($pattern);
             var dropBoxEdges = Edges($dropBox);
+            
+            simulation.isAltering = false;
 
-            // If you drop in bounds and simulation isn't frozen
-            if (dropBoxEdges.inBounds(gridEdges) && !simulation.isFrozen) {
+            // If you drop in bounds and simulation isn't frozen or at limit
+            if (dropBoxEdges.inBounds(gridEdges) && !simulation.isBuffering && !simulation.atLimit) {
 
 
                 // Remove styling, fade element and return it
@@ -226,7 +228,7 @@ function applyDraggabilly (simulation) {
                 x = Math.abs(x);
                 y = Math.abs(y);
 
-                simulation.isAltering = false;
+                
                 simulation.addPattern(x, y, patternName);
 
                 // If simulation is running and is paused, unpause it and resume
@@ -244,12 +246,13 @@ function applyDraggabilly (simulation) {
 
             }
             // If pan ends and pattern is not within bounds
+            // or simulation is buffering or at limit
             else {
 
                 //var $gridOffsetTop = $grid.offset().top
                 console.log('not in bounds');
 
-
+                // Put pattern back
                 $patternWrapper.animate({
 
                     left: 0,

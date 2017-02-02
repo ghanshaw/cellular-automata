@@ -66,7 +66,7 @@
 	</style>
 </head>
 
-<body>
+<body class="">
 
     <!--
             /* (GH) Extra extra small devices (portrait) (phones, 480px and below) */
@@ -87,6 +87,21 @@
         <div class="large"></div>
     </div>
 
+
+	<div class="modal fade" id="modal-simulation-error" tabindex="-1" role="dialog" aria-hidden="true" data-dismiss="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+			  <span class="glyphicon glyphicon-alert modal-icon"></span>
+			</div>
+			<div class="modal-body">
+				<h4>On No!</h4>
+				<h5>We've lost the connection with the server and we must restart the simulation.</h5>
+				<h5>Please refresh your page if problem persists.</h5>
+				<button class="btn-modal" id="button-modal-restart" data-dismiss="modal">Restart Simulation</button>
+			</div>
+		  </div>
+	  </div>
+	</div>
 
 
 	<section id="section-header">
@@ -157,15 +172,16 @@
 			<div class="row">
 				<div class="col-sm-12 col-md-8">
 					<div class="canvas-wrapper">
-						<div class="loader-wrapper"><img class="loader" src="{% static 'game_of_life/images/other/loader.gif' %}" alt="" draggable="false"></div>
+						<div class="buffer-wrapper"><img class="buffer-icon" src="{% static 'game_of_life/images/other/buffer_icon.gif' %}" alt="" draggable="false"></div>
 						<div class="console-limit">
 							<div class="console-limit-message">
 								<h4 class="limit-year">You've simulated the maximum number of generations.</h4>
 								<h4 class="limit-population">Your simulation has reached its maximum sustainable population.</h4>
 								<h4>Feel free to explore the timeline or clear the simulation.</h4>
-								<button>Clear Simulation</button>
+								<button class="btn-canvas" id="button-canvas-clear">Clear Simulation</button>
 							</div>
 						</div>
+
 						<canvas id="grid"></canvas>
 					</div>
 					<div class="grid-dimensions"><h5>Rows: <span id="grid-rows">-</span> | Columns: <span id="grid-cols">-</span> | Visible Cells: <span id="grid-area">-</span></h5></div>

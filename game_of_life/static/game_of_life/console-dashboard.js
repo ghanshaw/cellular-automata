@@ -142,7 +142,7 @@ var drawDashboard = function() {
 
 
     // Gather data from genTimeline
-    var data = simulation.genTimeline.slice(0, simulation.maxYear + 1);
+    var data = simulation.genTimeline.slice(0, simulation.maxYearReached + 1);
 
     // Data relationships -- links data to svg groups (which may or may not exist already)
     //var svgPoints = this.svgChart.selectAll('g').data(data).enter();
@@ -167,7 +167,7 @@ var drawDashboard = function() {
     /*****************************/
 
     // xChart is the generation (year) (Reset every year)
-    var x_domain_max = simulation.maxYear;
+    var x_domain_max = simulation.maxYearReached;
     var xChart = d3.scaleLinear().domain([0, x_domain_max]).range([0, chartWidth]).clamp(true);
 
     // yChart is the population
@@ -313,14 +313,14 @@ var drawDashboard = function() {
 
 
         // Rewrite max generation
-        this.sliderMax.text(simulation.maxYear)
+        this.sliderMax.text(simulation.maxYearReached)
 
         // Redefine x scale of slider
         //this.xSlider = this.xChart;
 
-        var xPos = (simulation.year/simulation.maxYear) * sliderWidth;
+        var xPos = (simulation.year/simulation.maxYearReached) * sliderWidth;
 
-        if (simulation.maxYear == 0) {
+        if (simulation.maxYearReached == 0) {
             this.sliderMax.text(1);
             xPos = 0;
         }
@@ -351,7 +351,7 @@ var drawDashboard = function() {
         trackOverlay.attr("x2", xPos);
 
         // Compute year from handle position
-        dragYear = Math.round((xPos/sliderWidth) * simulation.maxYear);
+        dragYear = Math.round((xPos/sliderWidth) * simulation.maxYearReached);
         //Math.floor(dragYear);
         //console.log(dragYear);
 
@@ -379,7 +379,7 @@ var drawDashboard = function() {
 
 
         // If chosen year is less than year active currently
-        if (dragYear <= simulation.maxYear && dragYear >= 0 && dragYear != simulation.year) {
+        if (dragYear <= simulation.maxYearReached && dragYear >= 0 && dragYear != simulation.year) {
 
             // Choose generation based on dragged year
             simulation.chooseGeneration(dragYear);
