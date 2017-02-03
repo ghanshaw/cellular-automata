@@ -2,7 +2,7 @@ from django.db import models
 
 # Create your models here.
 class Pattern(models.Model):
-	cells = models.CharField(max_length=300)
+	cells = models.TextField()
 	name = models.CharField(max_length=200, unique=True)
 	type = models.CharField(max_length=100)
 	period = models.CharField(max_length=200)
