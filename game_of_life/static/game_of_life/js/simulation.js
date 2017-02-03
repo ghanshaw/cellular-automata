@@ -143,7 +143,13 @@ var restartConnection  = function() {
 //*************************************************//
 var createWebSocket = function(sim) {
 
-    var socket = new WebSocket("ws://" + window.location.host + '/game-of-life' + window.location.pathname);
+    var wsProtocol = 'ws://';
+
+    if (window.location.protocol == "https:") {
+        wsProtocol = "wss://";
+    }
+
+    var socket = new WebSocket(wsProtocol + window.location.host + '/game-of-life' + window.location.pathname);
 
     socket.addEventListener('open', function() {
         
