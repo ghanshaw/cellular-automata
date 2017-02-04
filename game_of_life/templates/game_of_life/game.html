@@ -3,43 +3,41 @@
 <html>
 <head>
 	<link rel="shortcut icon" type="image/png" href="{% static 'favicon.ico' %}" />
-	<title>Conway's Game of Life</title>
+	<title>Simulacra - Game of Life</title>
 
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 
 	<!-- jQuery -->
 	<script
-			src="https://code.jquery.com/jquery-2.2.4.min.js"
-			integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
-			crossorigin="anonymous">
+            src="https://code.jquery.com/jquery-2.2.4.min.js"
+            integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+            crossorigin="anonymous">
 	</script>
 
 	<!-- Boostrap -->
 	<link
-			href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
-			rel="stylesheet"
-			integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
-			crossorigin="anonymous">
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+            crossorigin="anonymous">
 	<script
-			src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
-			integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
-			crossorigin="anonymous">
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+            crossorigin="anonymous">
 	</script>
 
-
+        <!-- Google Font -->
 	<link href="https://fonts.googleapis.com/css?family=Raleway:300,900" rel="stylesheet">
-
 
 	<!-- D3.js -->
 	<script
-			src="https://d3js.org/d3.v4.min.js">
+            src="https://d3js.org/d3.v4.min.js">
 	</script>
 
 	<!-- Draggabilly -->
 	<script
-			src="https://npmcdn.com/draggabilly@2.1/dist/draggabilly.pkgd.min.js">
+            src="https://npmcdn.com/draggabilly@2.1/dist/draggabilly.pkgd.min.js">
 	</script>
-
 
 	<!-- Custom Scripts -->
 	<link rel="stylesheet" href="{% static 'game_of_life/css/style.css' %}" />
@@ -47,22 +45,9 @@
 	<script src="{% static 'game_of_life/js/simulation.js' %}"></script>
 	<script src="{% static 'game_of_life/js/event-listeners.js' %}"></script>
 	<script src="{% static 'game_of_life/js/console-dashboard.js' %}"></script>
-	<style>
-
-
-
-
-
-#section-header {
-    background: url("{% static 'game_of_life/images/other/grey_background.jpg' %}");
-}
-
-
-	</style>
 </head>
 
 <body class="">
-
     <!--
             /* (GH) Extra extra small devices (portrait) (phones, 480px and below) */
 
@@ -74,298 +59,212 @@
 
             /* Large devices (large desktops, 1200px and up) */
         -->
-
-
     <div class="breakpoints">
         <div class="small"></div>
         <div class="medium"></div>
         <div class="large"></div>
     </div>
-
-
-	<div class="modal fade" id="modal-simulation-error" tabindex="-1" role="dialog" aria-hidden="true" data-dismiss="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-			  <span class="glyphicon glyphicon-alert modal-icon"></span>
-			</div>
-			<div class="modal-body">
-				<h4>On No!</h4>
-				<h5>We've lost the connection with the server and we must restart the simulation.</h5>
-				<h5>Please refresh your page if problem persists.</h5>
-				<button class="btn-modal" id="button-modal-restart" data-dismiss="modal">Restart Simulation</button>
-			</div>
-		  </div>
-	  </div>
-	</div>
-
-
-	<section id="section-header">
-		<div class="container">
-
-			<div class='row'>
-
-				<div class="col-md-12 page-title-wrapper">
-
-					<h1 class="page-title">Conway's Game of Life</h1>
-
-				</div>
-			</div>
-		</div>
-	</section>
-
-
-	<section id="section-rules">
-		<div class="container">
-			<div class="row">
-
-				<div class="col-md-12">
-
-					<h2 class="section-title">Rules</h2>
-
-					<h4>The Game of Life, also known as Life, is a cellular automaton invented by mathematician
-						John Conway in 1970. The simulation consists of a two-dimensional orthogonal grid of cell,
-						each of which is either alive or dead. The status of each cell changes based on the eight
-						cells in its immediate surroundings. Each iteration, sometimes called a generation, the cells
-						and their neighbors are evaluated based on a simple set of rules to determine whether that
-						cell lives or dies.</h4>
-
-					<h4>This simulation is noteworthy because of its ability to generate complex results from very
-						simple rules. These rules embody some basic principles of biology—isolation, overpopulation
-						and reproduction. When applied across the grid, the rules can create patterns with “life-like”
-						behavior: birth, death, movement and even procreation.</h4>
-
-					<h4>The rules are as follows:</h4>
-
-					<ol type="1" class="rules-list">
-
-						<li>Any live cell with fewer than two live neighbors dies, as if by isolation.</li>
-						<li>Any live cell with two or three live neighbors continues to the next iteration.</li>
-						<li>Any live cell with four or more neighbors dies, as if by overpopulation.</li>
-						<li>Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.</li>
-
-					</ol>
-
-				</div>
-
-
-			</div>
-		</div>
-	</section>
-
-
-	<section id="section-simulation">
-
-		<div class="container">
-
-			<div class="row">
-				<div class="col-md-12">
-
-					<h2 class="section-title">Simulator
-					<span id="simulation-info" class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="right" title="{{ simulation_info }}"></span>
-					</h2>
-				</div>
-			</div>
-
-			<div class="row">
-				<div class="col-sm-12 col-md-8">
-					<div class="canvas-wrapper">
-						<div class="buffer-wrapper"><img class="buffer-icon" src="{% static 'game_of_life/images/other/buffer_icon.gif' %}" alt="" draggable="false"></div>
-						<div class="console-limit">
-							<div class="console-limit-message">
-								<h4 class="limit-year">You've simulated the maximum number of generations.</h4>
-								<h4 class="limit-population">Your simulation has reached its maximum sustainable population.</h4>
-								<h4>Feel free to explore the timeline or clear the simulation.</h4>
-								<button class="btn-canvas" id="button-canvas-clear">Clear Simulation</button>
-							</div>
-						</div>
-
-						<canvas id="grid"></canvas>
-					</div>
-					<div class="grid-dimensions"><h5>Rows: <span id="grid-rows">-</span> | Columns: <span id="grid-cols">-</span> | Visible Cells: <span id="grid-area">-</span></h5></div>
-				</div>
-
-				<div class='col-sm-12 col-md-offset-0 col-md-4'>
-
-							<a class="collapse-trigger hidden-md hidden-lg" data-toggle="collapse" href="#collapseDashboard" aria-expanded="true" aria-controls="#collapseDashboard">
-								<h4>Dashboard <span class="glyphicon glyphicon-menu-down"></span></h4>
-							</a>
-					<div class="row">
-						<div class="col-xs-12 col-sm-offset-2 col-sm-8 col-md-offset-0 col-md-12">
-							<div class="console-dashboard collapse in collapsible" id="collapseDashboard">
-								<div id="console-chart">
-									<svg></svg>
-								</div>
-								<div id="console-stats">
-									<div class="row">
-										<div class="col-xs-offset-1 col-xs-5 col-sm-offset-1 col-sm-5 col-md-offset-1 col-md-5 pop">
-											<h5>Population <small>(Visible)</small>: </h5>
-											<h2><span id="console-pop">0</span> <small id="console-pop-visible"></small></h2>
-										</div>
-										<div class="col-xs-offset-1 col-xs-5 col-sm-offset-1 col-sm-5 col-md-offset-1 col-md-5">
-											<h5>Generation: </h5>
-											<h2><span id="console-gen">0</span></h2>
-										</div>
-									</div>
-								</div>
-								<div id="console-slider">
-									<h5>Explore Timeline</h5>
-									<svg></svg>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<div class='row row-console'>
-
-				<div class='col-xs-12 col-md-11 col-lg-9'>
-					<a class="collapse-trigger" data-toggle="collapse" href="#collapseConsole" aria-expanded="true" aria-controls="#collapseConsole">
-						<h4>Console <span class="glyphicon glyphicon-menu-down"></span></h4>
-					</a>
-					<div class="collapse in collapsible" id="collapseConsole">
-
-					<div class="row">
-						<div class="col-sm-12 col-md-7">
-							<button type="button" class="btn-console console-freezable" id="button-step">Step</button>
-							<button type="button" class="btn-console btn-run switch console-freezable" id="button-run">Run</button>
-							<button type="button" class="btn-console" id="button-clear">Clear</button>
-							<button type="button" class="btn-console console-freezable" id="button-random">Random</button>
-						</div>
-						<div class="col-sm-12 col-md-5">
-							<button type="button" class="btn-console btn-speed switch console-freezable" id="button-slow"> > </button>
-							<button type="button" class="btn-console btn-speed switch console-freezable" id="button-medium"> >> </button>
-							<button type="button" class="btn-console btn-speed switch console-freezable" id="button-fast"> >>> </button>
-						</div>
-					</div>
-					</div>
-				</div>
-
-			</div>
-
-			<!-- Div used to store drag icons -->
-			<div id="drag-icons" ></div>
-
-			<div class='row row-still'>
-
-				<div class='col-md-5 col-lg-6'>
-					<a class="collapse-trigger" data-toggle="collapse" href="#collapseStill" aria-expanded="true" aria-controls="#collapseStill">
-						<h4>Still Lifes <span class="glyphicon glyphicon-menu-down"></span></h4>
-					</a>
-
-						<div class="collapse in collapsible" id="collapseStill">
-
-							{% for pattern in still_lifes %}
-							<figure>
-								 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
-									<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false" />
-									 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
-								 </div>
-								<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
-								<figcaption>{{ pattern.name|title }}</figcaption>
-							</figure>
-							{% endfor %}
-
-						</div>
-
-				</div>
-
-				<div class='col-md-offset-1 col-md-6 col-lg-6 col-lg-offset-0'>
-					<a class="collapse-trigger" data-toggle="collapse" href="#collapseOscillators" aria-expanded="true" aria-controls="#collapseOscillators">
-						<h4>Oscillators <span class="glyphicon glyphicon-menu-down"></span></h4>
-					</a>
-						<div class="collapse in collapsible" id="collapseOscillators">
-
-							{% for pattern in oscillators %}
-							<figure>
-								 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
-									<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
-									 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
-								 </div>
-								<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
-								<figcaption>{{ pattern.name|title }}<br><small>(period {{ pattern.period }})</small></figcaption>
-							</figure>
-							{% endfor %}
-
-						</div>
-
-				</div>
-
-
-			</div>
-
-			<div class='row row-spaceships-reproduction'>
-
-				<div class='col-md-4 col-lg-3'>
-					<a class="collapse-trigger" data-toggle="collapse" href="#collapseSpaceships" aria-expanded="true" aria-controls="#collapseSpaceships">
-						<h4>Spaceships <span class="glyphicon glyphicon-menu-down"></span></h4>
-					</a>
-
-					<div class="collapse in collapsible" id="collapseSpaceships">
-
-					{% for pattern in spaceships %}
-					<figure>
-						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
-							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
-							 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
-						 </div>
-						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
-						<figcaption>{{ pattern.name|title }}</figcaption>
-					</figure>
-					{% endfor %}
-
-					</div>
-
-				</div>
-
-				<div class='hidden-xs col-md-offset-1 col-md-5 col-lg-offset-1 col-lg-8'>
-					<a class="collapse-trigger" data-toggle="collapse" href="#collapseInfinite" aria-expanded="true" aria-controls="#collapseInfinite">
-						<h4>Infinite Growth <span class="glyphicon glyphicon-menu-down"></span></h4>
-					</a>
-
-					<div class="collapse in collapsible" id="collapseInfinite">
-
-					{% for pattern in infinite_growth %}
-					<figure>
-						 <div id="pattern-{{ pattern.name }}" class="pattern-wrapper console-freezable" draggable="">
-							<img class="pattern-overlay" src="{% static pattern.src|safe %}" alt="" draggable="false">
-							 <div class="drop-box" data-pattern-rows="{{ pattern.rows }}" data-pattern-cols="{{ pattern.columns }}"></div>
-						 </div>
-						<img class="pattern-underlay" src="{% static pattern.src|safe %}" alt="" >
-						<figcaption>{{ pattern.name|title }}</figcaption>
-					</figure>
-					{% endfor %}
-
-					</div>
-
-				</div>
-
-			</div>
-		</div>
-
-	</section>
-
-	<footer>
-		<div class="row">
-			<div class="col-xs-12 col-md-6 copyright">
-				<h5>© Copyright 2017 Greer Hanshaw</href></h5>
-			</div>
-			
-			<div class="col-xs-12 col-md-4 tag">
-				<h5>Designed and Developed by <a href="http://greerhanshaw.com" target="_blank">Greer Hanshaw</a></h5>
-			</div>
-			<div class="col-xs-6 col-md-1 github">
-				<h5><a href="https://github.com/ghanshaw" target="_blank">Github</a><h5>
-			</div>
-			<div class="col-xs-6 col-md-1 linkedin">
-				<h5><a href="https://www.linkedin.com/in/greer-hanshaw" target="_blank">LinkedIn</a><h5>
-			</div>
-		</div>
-	</footer>
-
-
+        
+    <div aria-hidden="true" class="modal fade" data-dismiss="modal" id="modal-simulation-error" role="dialog" tabindex="-1">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="glyphicon glyphicon-alert modal-icon"></span>
+            </div>
+            <div class="modal-body">
+                <h4>On No!</h4>
+                <h5>We've lost the connection with the server and we must restart the simulation.</h5>
+                <h5>Please refresh your page if problem persists.</h5><button class="btn-modal" data-dismiss="modal" id="button-modal-restart">Restart Simulation</button>
+            </div>
+        </div>
+    </div>
+        
+    <section id="section-header">
+        <div class="container">
+            <div class='row'>
+                <div class="col-md-12 page-title-wrapper">
+                    <h1 class="page-title">Conway's Game of Life</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+        
+    <section id="section-rules">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="section-title">Rules</h2>
+                    <h4>The Game of Life, also known simply as Life, is a cellular automaton invented by mathematician John Conway in 1970. The simulation consists of a two-dimensional orthogonal grid of cells, each of which is either alive or dead. The status of each cell changes based on the eight cells in its immediate surroundings. Each iteration, sometimes called a generation, the cells and their neighbors are evaluated based on a simple set of rules to determine whether that cell lives or dies.</h4>
+                    <h4>This simulation is noteworthy because of its ability to generate complex results from very simple rules. These rules embody some basic principles of biology—isolation, overpopulation and reproduction. When applied across the grid, the rules can create patterns with “life-like” behavior: birth, death, movement and even procreation.</h4>
+                    <h4>The rules are as follows:</h4>
+                    <ol class="rules-list" type="1">
+                        <li>Any live cell with fewer than two live neighbors dies, as if by isolation.</li>
+                        <li>Any live cell with two or three live neighbors continues to the next iteration.</li>
+                        <li>Any live cell with four or more neighbors dies, as if by overpopulation.</li>
+                        <li>Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+        
+    <section id="section-simulation">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="section-title">Simulator <span class="glyphicon glyphicon-info-sign" data-placement="right" data-toggle="tooltip" id="simulation-info" title="{{ simulation_info }}"></span></h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-8">
+                    <div class="canvas-wrapper">
+                        <div class="buffer-wrapper"><img alt="" class="buffer-icon" draggable="false" src="{% static 'game_of_life/images/other/buffer_icon.gif' %}"></div>
+                        <div class="console-limit">
+                            <div class="console-limit-message">
+                                <h4 class="limit-year">You've simulated the maximum number of generations.</h4>
+                                <h4 class="limit-population">Your simulation has reached its maximum sustainable population.</h4>
+                                <h4>Feel free to explore the timeline or clear the simulation.</h4><button class="btn-canvas" id="button-canvas-clear">Clear Simulation</button>
+                            </div>
+                        </div>
+                        <canvas id="grid"></canvas>
+                    </div>
+                    <div class="grid-dimensions">
+                        <h5>Rows: <span id="grid-rows">-</span> | Columns: <span id="grid-cols">-</span> | Visible Cells: <span id="grid-area">-</span></h5>
+                    </div>
+                </div>
+                <div class='col-sm-12 col-md-offset-0 col-md-4'>
+                    <a aria-controls="#collapseDashboard" aria-expanded="true" class="collapse-trigger hidden-md hidden-lg" data-toggle="collapse" href="#collapseDashboard">
+                    <h4>Dashboard <span class="glyphicon glyphicon-menu-down"></span></h4></a>
+                    <div class="row">
+                        <div class="col-xs-12 col-sm-offset-2 col-sm-8 col-md-offset-0 col-md-12">
+                            <div class="console-dashboard collapse in collapsible" id="collapseDashboard">
+                                <div id="console-chart">
+                                    <svg></svg>
+                                </div>
+                                <div id="console-stats">
+                                    <div class="row">
+                                        <div class="col-xs-offset-1 col-xs-5 col-sm-offset-1 col-sm-5 col-md-offset-1 col-md-5 pop">
+                                            <h5>Population <small>(Visible)</small>:</h5>
+                                            <h2><span id="console-pop">0</span> <small id="console-pop-visible"></small></h2>
+                                        </div>
+                                        <div class="col-xs-offset-1 col-xs-5 col-sm-offset-1 col-sm-5 col-md-offset-1 col-md-5">
+                                            <h5>Generation:</h5>
+                                            <h2><span id="console-gen">0</span></h2>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="console-slider">
+                                    <h5>Explore Timeline</h5><svg></svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='row row-console'>
+                <div class='col-xs-12 col-md-11 col-lg-9'>
+                    <a aria-controls="#collapseConsole" aria-expanded="true" class="collapse-trigger" data-toggle="collapse" href="#collapseConsole">
+                    <h4>Console <span class="glyphicon glyphicon-menu-down"></span></h4></a>
+                    <div class="collapse in collapsible" id="collapseConsole">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-7">
+                                <button class="btn-console console-freezable" id="button-step" type="button">Step</button> <button class="btn-console btn-run switch console-freezable" id="button-run" type="button">Run</button> <button class="btn-console" id="button-clear" type="button">Clear</button> <button class="btn-console console-freezable" id="button-random" type="button">Random</button>
+                            </div>
+                            <div class="col-sm-12 col-md-5">
+                                <button class="btn-console btn-speed switch console-freezable" id="button-slow" type="button">&gt;</button> <button class="btn-console btn-speed switch console-freezable" id="button-medium" type="button">&gt;&gt;</button> <button class="btn-console btn-speed switch console-freezable" id="button-fast" type="button">&gt;&gt;&gt;</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class='row row-still'>
+                <div class='col-md-5 col-lg-6'>
+                    <a aria-controls="#collapseStill" aria-expanded="true" class="collapse-trigger" data-toggle="collapse" href="#collapseStill">
+                    <h4>Still Lifes <span class="glyphicon glyphicon-menu-down"></span></h4></a>
+                    <div class="collapse in collapsible" id="collapseStill">
+                        {% for pattern in still_lifes %}
+                        <figure>
+                            <div class="pattern-wrapper console-freezable" draggable="" id="pattern-{{ pattern.name }}">
+                                <img alt="" class="pattern-overlay" draggable="false" src="{% static pattern.src|safe %}">
+                                <div class="drop-box" data-pattern-cols="{{ pattern.columns }}" data-pattern-rows="{{ pattern.rows }}"></div>
+                            </div><img alt="" class="pattern-underlay" src="{% static pattern.src|safe %}">
+                            <figcaption>
+                                {{ pattern.name|title }}
+                            </figcaption>
+                        </figure>{% endfor %}
+                    </div>
+                </div>
+                <div class='col-md-offset-1 col-md-6 col-lg-6 col-lg-offset-0'>
+                    <a aria-controls="#collapseOscillators" aria-expanded="true" class="collapse-trigger" data-toggle="collapse" href="#collapseOscillators">
+                    <h4>Oscillators <span class="glyphicon glyphicon-menu-down"></span></h4></a>
+                    <div class="collapse in collapsible" id="collapseOscillators">
+                        {% for pattern in oscillators %}
+                        <figure>
+                            <div class="pattern-wrapper console-freezable" draggable="" id="pattern-{{ pattern.name }}">
+                                <img alt="" class="pattern-overlay" draggable="false" src="{% static pattern.src|safe %}">
+                                <div class="drop-box" data-pattern-cols="{{ pattern.columns }}" data-pattern-rows="{{ pattern.rows }}"></div>
+                            </div><img alt="" class="pattern-underlay" src="{% static pattern.src|safe %}">
+                            <figcaption>
+                                {{ pattern.name|title }}<br>
+                                <small>(period {{ pattern.period }})</small>
+                            </figcaption>
+                        </figure>{% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class='row row-spaceships-reproduction'>
+                <div class='col-md-4 col-lg-3'>
+                    <a aria-controls="#collapseSpaceships" aria-expanded="true" class="collapse-trigger" data-toggle="collapse" href="#collapseSpaceships">
+                    <h4>Spaceships <span class="glyphicon glyphicon-menu-down"></span></h4></a>
+                    <div class="collapse in collapsible" id="collapseSpaceships">
+                        {% for pattern in spaceships %}
+                        <figure>
+                            <div class="pattern-wrapper console-freezable" draggable="" id="pattern-{{ pattern.name }}">
+                                <img alt="" class="pattern-overlay" draggable="false" src="{% static pattern.src|safe %}">
+                                <div class="drop-box" data-pattern-cols="{{ pattern.columns }}" data-pattern-rows="{{ pattern.rows }}"></div>
+                            </div><img alt="" class="pattern-underlay" src="{% static pattern.src|safe %}">
+                            <figcaption>
+                                {{ pattern.name|title }}
+                            </figcaption>
+                        </figure>{% endfor %}
+                    </div>
+                </div>
+                <div class='hidden-xs col-md-offset-1 col-md-5 col-lg-offset-1 col-lg-8'>
+                    <a aria-controls="#collapseInfinite" aria-expanded="true" class="collapse-trigger" data-toggle="collapse" href="#collapseInfinite">
+                    <h4>Infinite Growth <span class="glyphicon glyphicon-menu-down"></span></h4></a>
+                    <div class="collapse in collapsible" id="collapseInfinite">
+                        {% for pattern in infinite_growth %}
+                        <figure>
+                            <div class="pattern-wrapper console-freezable" draggable="" id="pattern-{{ pattern.name }}">
+                                <img alt="" class="pattern-overlay" draggable="false" src="{% static pattern.src|safe %}">
+                                <div class="drop-box" data-pattern-cols="{{ pattern.columns }}" data-pattern-rows="{{ pattern.rows }}"></div>
+                            </div><img alt="" class="pattern-underlay" src="{% static pattern.src|safe %}">
+                            <figcaption>
+                                {{ pattern.name|title }}
+                            </figcaption>
+                        </figure>{% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+        
+    <footer>
+        <div class="row">
+            <div class="col-xs-12 col-md-6 copyright">
+                <h5>© Copyright 2017 Greer Hanshaw</h5>
+            </div>
+            <div class="col-xs-12 col-md-4 tag">
+                <h5>Designed and Developed by <a href="http://greerhanshaw.com" target="_blank">Greer Hanshaw</a></h5>
+            </div>
+            <div class="col-xs-6 col-md-1 github">
+                <h5><a href="https://github.com/ghanshaw" target="_blank">Github</a></h5>
+            </div>
+            <div class="col-xs-6 col-md-1 linkedin">
+                <h5><a href="https://www.linkedin.com/in/greer-hanshaw" target="_blank">LinkedIn</a></h5>
+            </div>
+        </div>
+    </footer>
 </body>
-</html>
 
 
 

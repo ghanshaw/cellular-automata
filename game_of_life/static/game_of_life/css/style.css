@@ -1,75 +1,3 @@
-
-/*
-
-Fresh Air: #B0D7FF
-Glitter: #EAE8FF
-Gunmetal: #2D3142
-Silver Chalise: #ADACB5
-Gainsboro: #D8D5DB
-
-
-*/
-{% load static %}
-
-
-.modal {
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(105, 105, 105, 0.7);
-}
-
-.modal-content {
-    text-align: center;
-    max-width: 90%;
-}
-
-.modal button.close {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    color: black;
-}
-
-
-
-.modal-header {
-    background-color: rgb(226, 116, 125);
-    color: white;
-    border: 1px solid rgb(226, 116, 125);
-    padding: 30px 0px;
-    border-radius: 5px 5px 0px 0px;
-}
-
-.modal-body {
-    padding: 20px 30px 30px 30px;
-}
-
-.modal-body h4 {
-    font-weight: bold;
-}
-
-.btn-modal {
-    font-size: 13px;
-    width: 135px;
-    height: 51px;
-    border-radius: 30px;
-    border: none;
-    border: 4px solid #e2747d;
-    color: #e2747d;
-    background-color: white;
-    margin-top: 20px;
-    font-family: 'Raleway';
-}
-
-
-.modal-icon {
-    font-size: 50px;
-}
-
-.modal p {
-    font-size: 18px;
-}
-
 /*
 -----------------------------
 General
@@ -91,28 +19,9 @@ html, body {
     font-weight: 300;
 }
 
-
 :focus {
     outline: none;
 }
-
-
-
-.hamburger {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    color: white;
-}
-
-
-
-.hamburger-inner, .hamburger-inner:after, .hamburger-inner:before  {
-    background-color: white;
-    width: 30px;
-    height: 2px;
-}
-
 
 /*
 -----------------------------
@@ -120,23 +29,30 @@ Section - Header
 -----------------------------
 */
 
-
 #section-header {
     height: 160px;
     background-color: #2D3142;
     color: white;
     position: relative;
+    background: url(/static/game_of_life/images/other/grey_background.jpg);
 }
 
-
-
+/* Adapt size of section tile for different screens */
 @media screen and (min-width: 481px) and (max-width: 780px) {
     #section-header {
         height: 200px;
     }
 }
 
+@media screen and (max-width: 480px) {
+    #section-header {
+        height: 300px;
+    }
 
+    #section-header .page-title {
+        font-size: 55px;
+    }
+}
 
 #section-header .jumbotron {
     margin-top: 50px;
@@ -155,23 +71,11 @@ Section - Header
     font-size: 63px;
 }
 
-@media screen and (max-width: 480px) {
-    #section-header {
-        height: 300px;
-    }
-
-    #section-header .page-title {
-        font-size: 55px;
-    }
-}
-
-
 /*
 -----------------------------
 Section - Rules
 -----------------------------
 */
-
 
 #section-rules {
     padding: 100px 0px;
@@ -194,13 +98,49 @@ Section - Rules
     margin-top: 30px;
 }
 
-
-
 /*
 -----------------------------
 Section - Simulation
 -----------------------------
 */
+
+#section-simulation {
+    padding: 70px 0px;
+    background-color: #E2F0FF;
+    background-color: #2F6690;
+    color: white;
+    background-color: #f3f3f3;
+    color: black;
+}
+
+#section-simulation .row-still {
+    //display: flex;
+    //align-items: center;
+}
+
+/* --- Simulation Info Tooltip ---*/
+
+#section-simulation #simulation-info {
+    font-weight: 100;
+    font-size: 16px;
+    top: -3px;
+    left: 3px;
+    color: #2b2b2b;
+}
+
+#section-simulation .tooltip-arrow {
+    border-right-color: rgba(51, 51, 51, 0.7);
+}
+
+#section-simulation .tooltip-inner {
+    background-color: rgba(51, 51, 51, 0.7);
+}
+
+#section-simulation #simulation-info:hover {
+    color: #04ce92;
+}
+
+/* --- Simulation Buttons ---*/
 
 .btn-console {
     height: 50px;
@@ -223,8 +163,6 @@ Section - Simulation
     border: none;
 }
 
-
-
 .btn-console.is-pointer-down {
     color: #04ce92;
     transform: translateY(5px);
@@ -237,7 +175,6 @@ Section - Simulation
     box-shadow: 3px 3px 8px #888;
 }
 
-
 .btn-speed {
     height: 40px;
     width: 65px;
@@ -245,16 +182,23 @@ Section - Simulation
     font-size: 15px;
 }
 
-
-
-#section-simulation {
-    padding: 70px 0px;
-    background-color: #E2F0FF;
-    background-color: #2F6690;
-    color: white;
-    background-color: #f3f3f3;
-    color: black;
+/* Extra padding on speed buttons for small screens */
+#section-simulation .btn-console {
+    margin-bottom: 25px;
 }
+
+/* Very small screens */
+@media screen and (max-width: 530px) {
+    #section-simulation .btn-console {
+        font-size: 13px;
+        width: 60px;
+        margin-right: 5px;
+        font-weight: 300px;
+    }
+
+}
+
+/* --- Simulation Canvas and Buffering Overlay ---*/
 
 #section-simulation .canvas-wrapper {
     position: relative;
@@ -266,6 +210,18 @@ Section - Simulation
     border-image-repeat: stretch;
     height: 550px;
 
+}
+
+#section-simulation canvas#grid {
+    border: 4px solid black;
+    background-color: white;
+    width: 100%;
+    height: 100%;
+}
+
+#section-simulation .grid-dimensions {
+    text-align: right;
+    margin-bottom: 30px;
 }
 
 #section-simulation .buffer-wrapper {
@@ -281,6 +237,23 @@ Section - Simulation
     border: 4px solid black;
 }
 
+#section-simulation .buffer-icon {
+    width: 50px;
+}
+
+#section-simulation h4 {
+    line-height: 1.6;
+    border-bottom: 1px solid darkgrey;
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+}
+
+#section-simulation .row-other {
+    margin-top: 30px;
+}
+
+/* --- Simulation Limit - Overlay and Button ---*/
+
 #section-simulation .console-limit {
     display: none;
     justify-content: center;
@@ -293,7 +266,6 @@ Section - Simulation
     opacity: .8;
     border: 4px solid black;
 }
-
 
 #section-simulation .console-limit-message {
     text-align: center;
@@ -323,37 +295,14 @@ button.btn-canvas:hover {
     color: #00cc99;
 }
 
-#section-simulation canvas#grid {
-    border: 4px solid black;
-    background-color: white;
-    width: 100%;
-    height: 100%;
-}
-
-#section-simulation .grid-dimensions {
-    text-align: right;
-    margin-bottom: 30px;
-}
-
-#section-simulation .buffer-icon {
-    width: 50px;
-}
-
-
-#section-simulation #drag-icons {
-
-    position: absolute;
-    left: -1000px;
-
-}
-
-/*--------------------------------
-Console Dashboard
---------------------------------*/
-
+/* --- Console Dashboard/Chart ---*/
 
 #section-simulation .console-dashboard {
     text-align: center;
+}
+
+#section-simulation svg text {
+    font-family: 'Raleway', 'Roboto', sans-serif;
 }
 
 @media screen and (max-width: 979px) {
@@ -362,7 +311,6 @@ Console Dashboard
     }
 }
 
-
 #section-simulation #console-chart svg {
     width: 100%;
     height: 300px;
@@ -370,6 +318,35 @@ Console Dashboard
     background-color: white;
 }
 
+.ticks {
+  font: 10px sans-serif;
+}
+
+.track-outline,
+.track-inset,
+.track-overlay {
+  stroke-linecap: round;
+}
+
+.track-outline {
+  stroke: #000;
+  stroke-opacity: 0.3;
+  stroke-width: 10px;
+}
+
+.track-inset {
+  stroke: #ddd;
+  stroke-width: 8px;
+}
+
+.track-target {
+  pointer-events: stroke;
+  stroke-width: 50px;
+  cursor: crosshair;
+  stroke: transparent;
+}
+
+/* --- Console Dashboard/Stats ---*/
 
 #section-simulation #console-stats {
     margin-top: 20px;
@@ -396,46 +373,7 @@ Console Dashboard
     margin-top: 0px;
 }
 
-#section-simulation .collapse-trigger {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 0;
-    color: black;
-    text-decoration: none;
-}
-
-
-#section-simulation .collapse-trigger span {
-    float: right;
-    transform: rotate(-90deg);
-    transition: 500ms;
-}
-
-#section-simulation .collapse-trigger span {
-    float: right;
-    transform: rotate(0deg);
-    transition: 500ms;
-}
-
-#section-simulation .collapse-trigger:hover > h4 {
-    color: #04ce92;
-}
-
-
-#section-simulation .collapse-trigger.collapsed span {
-    transform: rotate(-90deg);
-}
-
-
-#section-simulation .collapsible {
-    padding-top: 10px;
-    padding-left: 10px;
-}
-
-#section-simulation .collapsible#collapseDashboard {
-    padding: 0px;
-}
+/* --- Console Dashboard/Slider ---*/
 
 #section-simulation #console-slider {
     position: relative;
@@ -473,59 +411,59 @@ Console Dashboard
     padding-left: 2px;
 }
 
-#section-simulation .row-still {
-    //display: flex;
-    //align-items: center;
+.handle {
+  fill: #fff;
+  stroke: #000;
+  stroke-opacity: 0.5;
+  stroke-width: 1.25px;
 }
 
-#section-simulation #simulation-info {
-    font-weight: 100;
-    font-size: 16px;
-    top: -3px;
-    left: 3px;
-    color: #2b2b2b;
+/* --- Console Section Collapsing ---*/
+
+#section-simulation .collapse-trigger {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0;
+    color: black;
+    text-decoration: none;
 }
 
-#section-simulation .tooltip-arrow {
-    border-right-color: rgba(51, 51, 51, 0.7);
+#section-simulation .collapse-trigger span {
+    float: right;
+    transform: rotate(-90deg);
+    transition: 500ms;
 }
 
-#section-simulation .tooltip-inner {
-    background-color: rgba(51, 51, 51, 0.7);
+#section-simulation .collapse-trigger span {
+    float: right;
+    transform: rotate(0deg);
+    transition: 500ms;
 }
 
-#section-simulation #simulation-info:hover {
+#section-simulation .collapse-trigger:hover > h4 {
     color: #04ce92;
 }
 
-
-#section-simulation svg text {
-    font-family: 'Raleway', 'Roboto', sans-serif;
-}
-
-/* Extra padding on speed buttons for small screens */
-#section-simulation .btn-console {
-    margin-bottom: 25px;
-}
-
-/* Very small screens */
-@media screen and (max-width: 530px) {
-    #section-simulation .btn-console {
-        font-size: 13px;
-        width: 60px;
-        margin-right: 5px;
-        font-weight: 300px;
-    }
-
+#section-simulation .collapse-trigger.collapsed span {
+    transform: rotate(-90deg);
 }
 
 
+#section-simulation .collapsible {
+    padding-top: 10px;
+    padding-left: 10px;
+}
+
+#section-simulation .collapsible#collapseDashboard {
+    padding: 0px;
+}
+
+/* --- Console Patterns ---*/
 
 #section-simulation figure {
     margin-bottom: 25px;
 }
-
-
 
 #section-simulation figure {
     display: inline-block;
@@ -536,10 +474,8 @@ Console Dashboard
 }
 
 #section-simulation .pattern-wrapper {
-    //background-color: #06D6A0;
     position: absolute;
 }
-
 
 #section-simulation figure img {
     box-shadow: 5px 5px 15px #888;
@@ -551,10 +487,10 @@ Console Dashboard
     -ms-user-select: none;
 }
 
-#section-simulation .is-dragging img.pattern-overlay {
-    opacity: .75;
-    box-shadow: 0 0 7px rgb(6, 214, 160);
-    border: 1px solid rgb(6, 214, 160);
+#section-simulation figcaption {
+    margin-top: 8px;
+    font-size: 12px;
+    font-family: 'Raleway', 'Roboto', sans-serif;
 }
 
 #section-simulation div.drop-box {
@@ -562,6 +498,16 @@ Console Dashboard
     top: 0;
     visibility: hidden;
 }
+
+/*-------> Is Dragging */
+
+#section-simulation .is-dragging img.pattern-overlay {
+    opacity: .75;
+    box-shadow: 0 0 7px rgb(6, 214, 160);
+    border: 1px solid rgb(6, 214, 160);
+}
+
+/*-------> In Bounds */
 
 #section-simulation .in-bounds div.drop-box {
     opacity: .8;
@@ -571,66 +517,17 @@ Console Dashboard
     visibility: visible;
 }
 
-
 #section-simulation figure div.pattern-wrapper.in-bounds {
     background-color: #06D6A0;
     opacity: .5;
 }
-
 
 #section-simulation figure img.in-bounds {
     box-shadow: 0 0 7px rgb(6, 214, 160);
     display: none;
 }
 
-
-#section-simulation h4 {
-    line-height: 1.6;
-    border-bottom: 1px solid darkgrey;
-    padding-bottom: 15px;
-    margin-bottom: 15px;
-}
-
-#section-simulation form.text-pattern {
-        display: inline-table;
-    margin-right: 25px;
-}
-
-
-#section-simulation form.text-pattern input {
-    background-color: transparent;
-    border: none;
-    box-shadow: none;
-    border-radius: 0;
-    border-bottom: 3px solid black;
-    margin-right: 15px;
-    font-size: 20px;
-    color: black;
-    width: 200px;
-    display: inline-table;
-}
-
-
-#section-simulation form.text-pattern button {
-    width: 60px;
-}
-
-
-#section-simulation #button-puffer {
-    width: 120px;
-}
-
-
-#section-simulation .row-other {
-    margin-top: 30px;
-}
-
-
-#section-simulation figcaption {
-    margin-top: 8px;
-    font-size: 12px;
-    font-family: 'Raleway', 'Roboto', sans-serif;
-}
+/* --- Freezing Console ---*/
 
 #section-simulation .console-freezable.frozen {
     pointer-events: none;
@@ -645,21 +542,24 @@ Console Dashboard
     background-color: white;
 }
 
-
 #section-simulation .pattern-wrapper.frozen img.pattern-overlay  {
     opacity: .2;
 }
 
-#section-simulation .pattern-wrapper.frozen.in-bounds {
-    background-color: white;
-}
+/*-------> Is Dragging */
 
 #section-simulation .pattern-wrapper.frozen.is-dragging img.pattern-overlay {
     box-shadow: none;
     border: none;
 }
 
-#section-simulation .pattern-wrapper.frozen.is-bounds img.pattern-overlay {
+/*-------> In Bounds */
+
+#section-simulation .pattern-wrapper.frozen.in-bounds {
+    background-color: white;
+}
+
+#section-simulation .pattern-wrapper.frozen.in-bounds img.pattern-overlay {
     box-shadow: none;
     border: none;
 }
@@ -669,7 +569,6 @@ Console Dashboard
 Footer
 -----------------------------
 */
-
 
 footer {
     background-color: #333333;
@@ -699,79 +598,26 @@ footer div a:hover {
     footer div.tag { text-align: center; }
 
     footer div.github { text-align: right; }
-    
+
     footer div.linkedin { text-align: left; }
 }
 
+/* Center footer on md/large devices */
 @media screen and (min-width: 979px) {
     footer div.copyright { text-align: left; }
 
     footer div.tag { text-align: right; }
 
     footer div.github { text-align: right; }
-    
+
     footer div.linkedin { text-align: right; }
 }
-
-
-/*
------------------------------
-Dashboard
------------------------------
-*/
-
-
-/* --- Chart ---*/
-
-.ticks {
-  font: 10px sans-serif;
-}
-
-.track-outline,
-.track-inset,
-.track-overlay {
-  stroke-linecap: round;
-}
-
-.track-outline {
-  stroke: #000;
-  stroke-opacity: 0.3;
-  stroke-width: 10px;
-}
-
-.track-inset {
-  stroke: #ddd;
-  stroke-width: 8px;
-}
-
-.track-target {
-  pointer-events: stroke;
-  stroke-width: 50px;
-  cursor: crosshair;
-  stroke: transparent;
-}
-
-/* --- Timeline Slider ---*/
-
-.handle {
-  fill: #fff;
-  stroke: #000;
-  stroke-opacity: 0.5;
-  stroke-width: 1.25px;
-}
-
-#pop-slider {
-    width: 100%
-    height: 300px;
-}
-
 
 /***
 --------------------
 Breakpoints Overlay (for design purposes)
 --------------------
 ***/
-
 
 .breakpoints {
     position: fixed;
@@ -801,4 +647,65 @@ Breakpoints Overlay (for design purposes)
 .breakpoints .large {
     background-color: rebeccapurple;
     left: 1200px;
+}
+
+/***
+-----------------------------
+Simulation Error Modal
+-----------------------------
+***/
+
+.modal {
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(105, 105, 105, 0.7);
+}
+
+.modal-content {
+    text-align: center;
+    max-width: 90%;
+}
+
+.modal button.close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    color: black;
+}
+
+.modal-header {
+    background-color: rgb(226, 116, 125);
+    color: white;
+    border: 1px solid rgb(226, 116, 125);
+    padding: 30px 0px;
+    border-radius: 5px 5px 0px 0px;
+}
+
+.modal-body {
+    padding: 20px 30px 30px 30px;
+}
+
+.modal-body h4 {
+    font-weight: bold;
+}
+
+.btn-modal {
+    font-size: 13px;
+    width: 135px;
+    height: 51px;
+    border-radius: 30px;
+    border: none;
+    border: 4px solid #e2747d;
+    color: #e2747d;
+    background-color: white;
+    margin-top: 20px;
+    font-family: 'Raleway';
+}
+
+.modal-icon {
+    font-size: 50px;
+}
+
+.modal p {
+    font-size: 18px;
 }

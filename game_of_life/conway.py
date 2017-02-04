@@ -1,24 +1,18 @@
 from random import randint
 from .models import Pattern
-from django.core.serializers.json import DjangoJSONEncoder
 import json
-from collections import Counter
 import copy
 from time import time
 from collections import defaultdict
 import math
 
+# Conway class implement Conway's Game of Life
 class Conway():
+
+	# Initialize Conway class
 	def __init__(self, rows=10, cols=10):
 
-
-		#self.rows = rows
-		#self.cols = cols
-
-		# 2D array storing moore totals for each cell
-		#self.moore_total = []
-
-		# Generation dict stores 2D array of cells,
+		# Generation dict stores set of living cells,
 		# generation year and population
 		self.generation = {
 			'cells': set(),
@@ -26,7 +20,14 @@ class Conway():
 			'pop': 0
 		}
 
+		# Timeline (all activity since year 0) of game represented with a list,
+		# stores population at every year (index)
 		self.gen_timeline = []
+
+		# Predictions list stores generations across a range of years
+		self.predictions = []
+
+		# (Arbitrary) limits imposed on simulation
 		self.max_year = 2000
 		self.max_pop = 5000
 		self.limit = {
@@ -35,9 +36,7 @@ class Conway():
 		}
 
 
-		self.predictions = []
-
-
+	# Check if game has reached limits imposed on simulation
 	def check_limit(self):
 		# Limit has been reached already
 		if self.limit['year'] != -1:
@@ -50,40 +49,22 @@ class Conway():
 		elif self.generation['pop'] >= self.max_pop:
 			self.limit['param'] = 'population'
 			self.limit['year'] = self.generation['year']
-		# else:
-		# 	self.limit = {
-		# 		'year': -1,
-		# 		'param': None
-		# 	}
-		# return False
+		return
 
 
-
-	def randomize(self, gridRows, gridCols):
-
-		# Arbitraty area around visible rows/cols to randomize
-		expand_factor = 1.2;
-		self.generation['cells'].clear();
-
-		for r in range(math.floor(gridRows * expand_factor)):
-			for c in range(math.floor(gridCols * expand_factor)):
-				if randint(0, 1):
-					self.generation['cells'].add((r, c))
-
-		self.generation['pop'] = len(self.generation['cells'])
-		self.record_history()
-		self.check_limit()
-
-
-	# Step through another generations
+	# Step through another generation
 	def step(self):
 
+		# Store all cells with positive total in moore neighborhood
 		moore_total = defaultdict(int)
 
+		# Iterate through living cells
 		for cell in iter(self.generation['cells']):
 
+			# Extract row and col
 			row, col = cell
 
+			# Define moore neighborhood of that cell
 			moore_neighborhood = [
 				(row - 1, col - 1),
 				(row - 1, col),
@@ -95,35 +76,48 @@ class Conway():
 				(row + 1, col + 1),
 			]
 
+			# For every moore neighbor, increment her moore neighboorhood total
+			# Not total of cell currently being evaluated
 			for r, c in moore_neighborhood:
 				moore_total[(r, c)] += 1
 
+		# Empty set for new living cells
 		living_cells = set()
 
+		# Iterate through all cells with positive moore neighborhood
 		for cell in moore_total:
-			# if cell is alive
+
+			# If that cell is also alive
 			if cell in self.generation['cells']:
 
+				# Apply rules of game, and add to new set of living cells
 				if moore_total[cell] == 2 or moore_total[cell] == 3:
 					living_cells.add(cell)
 
-			# if cell is dead
+			# If cell is dead
 			else:
+
+				# Apply rules of game, and add to new set of living cells
 				if moore_total[cell] == 3:
 					living_cells.add(cell)
 
-
+		# Replace generation set with new set, update generation details
 		self.generation['cells'] = living_cells
 		self.generation['pop'] = len(living_cells)
 		self.generation['year'] += 1
 
-		# Record history
+		# Update timeline and check against simulation limits
 		self.record_history()
 		self.check_limit()
+		return
 
 
+	# Generate predictions, step through game num times and store in predictions list
 	def predict(self, num=10):
+
+		# Track execution time of method
 		start_time = time()
+
 		# Delete existing predictions
 		del self.predictions
 		self.predictions = []
@@ -131,21 +125,41 @@ class Conway():
 		# Append current generation
 		self.append_prediction()
 
+		# Generate num predictions
 		for i in range(num):
 			self.step()
 			self.append_prediction()
 
+		# Print execution time of method
 		end_time = time()
 		print('Predict Time: ' + str(end_time - start_time) + ' s')
+		return
 
 
 	# Append current generation to predictions list
 	def append_prediction(self):
 		self.predictions.append(copy.deepcopy(self.generation))
+		return
 
 
+	# Add activated cells to game
+	def activate_cells(self, new_cells):
+
+		# Iterate through cells, tupelize and add to game
+		for cell in new_cells:
+			self.generation['cells'].add(tuple(cell))
+
+		# Update population, update timeline and check against limits
+		self.generation['pop'] = len(self.generation['cells'])
+		self.record_history()
+		self.check_limit()
+		return
+
+
+	# Add pattern to game at specific location
 	def add_pattern(self, row_offset, col_offset, pattern):
 
+		# Get pattern from Pattern model
 		pattern_cells = Pattern.objects.get(name=pattern)
 		rows = pattern_cells.rows
 		columns = pattern_cells.columns
@@ -155,6 +169,7 @@ class Conway():
 		for i in range(rows):
 			for j in range(columns):
 
+				# Get row and column
 				row = i + row_offset
 				col = j + col_offset
 
@@ -167,26 +182,34 @@ class Conway():
 		# Add cells in pattern to generation
 		for row, col in pattern_cells:
 
+			# Get row and column
 			row += row_offset
 			col += col_offset
 
 			self.generation['cells'].add((row, col))
 
+		# Update population, update timeline, check again limits
 		self.generation['pop'] = len(self.generation['cells'])
 		self.record_history()
 		self.check_limit()
 		return
 
+
+	# Update timeline
 	def record_history(self):
 
+		# Get year and population
 		year = self.generation['year']
 		pop = self.generation['pop']
 
+		# Add population to timeline at year index
 		try:
 			self.gen_timeline[year] = pop
+		# If index isn't defined, append to list
 		except IndexError:
 			if len(self.gen_timeline) == year:
 				self.gen_timeline.append(pop)
+			# Sanity check
 			else:
 				print("You're adding a generation that shouldn't exist.")
 				print("Year is {} and Population is {}".format(year, pop))
@@ -194,6 +217,30 @@ class Conway():
 
 		return
 
+
+	# Randomize living cells within defined range of coordinates
+	def randomize(self, grid_rows, grid_cols):
+
+		# Arbitrary area around visible rows/cols to randomize
+		expand_factor = 1.2
+
+		# Clear life from game
+		self.generation['cells'].clear()
+
+		# Loop through defined area, randomly adding living cells
+		for r in range(math.floor(grid_rows * expand_factor)):
+			for c in range(math.floor(grid_cols * expand_factor)):
+				if randint(0, 1):
+					self.generation['cells'].add((r, c))
+
+		# Update population, update timeline, check against limits
+		self.generation['pop'] = len(self.generation['cells'])
+		self.record_history()
+		self.check_limit()
+		return
+
+
+	# Erase timeline from year to end (inclusive)
 	def erase_future(self, year):
 
 		del self.gen_timeline[year:]
@@ -204,24 +251,18 @@ class Conway():
 				'year': -1,
 				'param': None
 			}
-
-	def activate_cells(self, new_cells):
-
-		for cell in new_cells:
-			self.generation['cells'].add(tuple(cell))
-
-		self.generation['pop'] = len(self.generation['cells'])
-		self.record_history()
-		self.check_limit()
 		return
 
+	# Clear game (living cells, year, population, timeline)
 	def clear(self):
 		self.generation['cells'].clear()
 		self.generation['year'] = 0
 		self.generation['pop'] = 0
 		self.record_history()
+		return
 
 
+	# Represent cells as a string
 	def cells_to_str(self):
 		max_row = 0
 		max_col = 0
@@ -246,60 +287,6 @@ class Conway():
 		return str_grid
 
 
-
-
-
-
+	# String representation of game
 	def __str__(self):
-		grid_str = ''
-		for i in range(len(self.generation['grid'])):
-			grid_str += str(self.generation['grid'][i]) + '\n'
-		return grid_str
-
-
-
-
-	def str_predictions(self):
-		self.pred_str = ''
-		for i in range(len(self.predictions)):
-			predict = self.predictions[i]
-			for j in range(len(predict)):
-				self.pred_str += '     ' + str(predict[j]) + '\n'
-			self.pred_str += '(' + str(id(predict)) + ')' + '------------------------------' + '\n'
-		return self.pred_str
-
-
-
-
-	def get_grid(self):
-		return self.generation['grid']
-
-
-'''
-    1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
-    2. Any live cell with two or three live neighbours lives on to the next generation.
-    3. Any live cell with more than three live neighbours dies, as if by overpopulation.
-    4. Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction.
-'''
-
-
-# conway = Conway()
-# new_cells = {'2.2', '2.4', '2.5', '2.6', '3.2', '3.3', '5.5', '7.7', '9.9'}
-# conway.activate_cells(new_cells)
-# print(conway.cells_to_str())
-# conway.step()
-# conway.predict(10)
-# print(conway.cells_to_str())
-
-
-
-
-# def make_generation(self, rows, cols):
-# 	self.rows = rows
-# 	self.cols = cols
-# 	for i in range(self.rows):
-# 		self.generation['grid'].append([])
-# 		self.moore_total.append([])
-# 		for j in range(self.cols):
-# 			self.generation['grid'][i].append(0)
-# 			self.moore_total[i].append(0)
+		return "Population: {}, Year: {}".format(self.generation['pop'], self.generation['year'])

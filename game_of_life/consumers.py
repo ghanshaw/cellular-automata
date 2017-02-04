@@ -1,34 +1,33 @@
 from django.http import HttpResponse
 from channels.handler import AsgiHandler
-from .conway import Conway
-from django.core.serializers.json import DjangoJSONEncoder
-import json
 from channels.sessions import channel_session, enforce_ordering
+from .models import Pattern
+from .conway import Conway
+import json
 from time import time
 import math
 
-
-
-
+# Connected to websocket.connect
 def ws_connect(message):
     message.reply_channel.send({
         'accept': True
 })
 
-
-
-#@enforce_ordering(slight=False)
+# Connected to websocket.receive
+# @enforce_ordering(slight=False)
 @channel_session
 def ws_receive(message):
 
+	# Track execution time of processing one message
 	start_time = time()
 
 	# Get message from client side
 	message_dict = json.JSONDecoder().decode(message.content['text'])
 
+	# Number of message so far
 	order = message.content['order']
 
-	# Intialize game
+	# Initialize game
 	if message_dict['serverCommand'] == 'initConway':
 
 			# Create generations array
@@ -40,9 +39,18 @@ def ws_receive(message):
 			# Add default pattern to Grid
 			center_row = math.floor(message_dict['rows']/2)
 			center_col = math.floor(message_dict['cols']/2)
-			conway.add_pattern(center_row, center_col, 'lightweight spaceship')
-			# new_cells = [(2,2), (2,4), (2,5), (2,6), (3,2), (3,3), (5,5), (7,7), (9,9)]
-			# conway.activate_cells(new_cells)
+
+			# Extract pattern to add to game
+			pattern_cells = Pattern.objects.get(name='pulsar')
+			pattern_rows = pattern_cells.rows
+			pattern_columns = pattern_cells.columns
+			pattern_cells = json.JSONDecoder().decode(pattern_cells.cells)
+
+			# Compute row/col pair to center pattern
+			row_col = (center_row - math.floor(pattern_rows/2), center_col - math.floor(pattern_columns/2))
+
+			# Add pattern to game
+			conway.add_pattern(row_col[0],row_col[1], 'pulsar')
 
 			# Generate predictions
 			conway.predict(45)
@@ -66,6 +74,7 @@ def ws_receive(message):
 		generations = message.channel_session['generations']
 		conway = message.channel_session['conway']
 
+		# Generating more predictions (adding to prediction buffer on client side)
 		if message_dict['serverCommand'] == 'getPredictions':
 
 			# Retrieve year
@@ -84,6 +93,7 @@ def ws_receive(message):
 				# Add generations to generations array
 				generations.extend(conway.predictions)
 
+			# Create response message
 			message_json = {
 				'content': 'predictions',
 				'predictions': generations[year:year + 30],
@@ -93,6 +103,7 @@ def ws_receive(message):
 				'order': order
 			}
 
+		# Clearing game (deleting all live cells, resetting timeline)
 		elif message_dict['serverCommand'] == 'clear':
 
 			# Erase future
@@ -115,6 +126,7 @@ def ws_receive(message):
 			message.channel_session['generations'] = []
 			message.channel_session['generations'].append(conway.generation)
 
+		# Add pattern to game at specific location
 		elif message_dict['serverCommand'] == 'addPattern':
 
 			# Retrieve pattern and placement from message
@@ -153,6 +165,7 @@ def ws_receive(message):
 			# Add generations to generations array
 			generations.extend(conway.predictions)
 
+		# Add cells activated by client to game
 		elif message_dict['serverCommand'] == 'activateCells':
 
 			# Retrieve array of new cells, and year
@@ -189,12 +202,13 @@ def ws_receive(message):
 			# Add generations to generations array
 			generations.extend(conway.predictions)
 
+		# Randomize living cells in visible range of grid
 		elif message_dict['serverCommand'] == 'randomize':
 
 			# Retrieve year, row and col
 			year = message_dict['year']
-			gridRows = message_dict['gridRows']
-			gridCols = message_dict['gridCols']
+			grid_rows = message_dict['gridRows']
+			grid_cols = message_dict['gridCols']
 
 			# Retrieve generation at specific year
 			# Delete generations from that year forward (including that year)
@@ -208,7 +222,7 @@ def ws_receive(message):
 			conway.generation = gen
 
 			# Randomize board, while preserving year
-			conway.randomize(gridRows, gridCols)
+			conway.randomize(grid_rows, grid_cols)
 
 			# Generate predictions
 			conway.predict(45)
@@ -232,14 +246,7 @@ def ws_receive(message):
 	# Update session with latest version of conway
 	message.channel_session['conway'] = conway
 
-	# # If limit reached, inform client
-	# if conway.limit_reached():
-	# 	message_json['limit'] = {
-	# 		'year': conway.limit_year,
-	# 		'param': conway.limit_param
-	# 	}
-
-	# Jsonify Data
+	# Jsonify message
 	message_json = json.dumps(message_json, default=set_default)
 
 	# Send data to client
@@ -247,8 +254,9 @@ def ws_receive(message):
 		"text": message_json,
 	})
 
+	# Finish tracking execution
 	end_time = time()
-	print('Consumers.py time : ' +  str(end_time - start_time) + ' s')
+	print('Consumers.py time: ' + str(end_time - start_time) + ' s')
 
 
 # Helper function to jsonify sets
@@ -256,17 +264,6 @@ def set_default(obj):
 	if isinstance(obj, set):
 		return list(obj)
 	raise TypeError
-
-# def limit_reached(conway, generations, year, order):
-#
-# 	message_json = {
-# 		'content': 'predictions',
-# 		'predictions': generations[year:year + 30],
-# 		'clientCommand': 'limitReached',
-# 		'genTimeline': conway.gen_timeline,
-# 		'order': order,
-# 		'limit': conway.limit
-# 	}
 
 
 

@@ -27,15 +27,14 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-# ALLOWED_HOSTS = [
-#     ".herokuapp.com",
-#     # '192.168.1.2',
-#     '127.0.0.1',
-#     '0.0.0.0'
-#     # '192.168.1.8'
-# ]
+ALLOWED_HOSTS = [
+    ".simulacra.herokuapp.com",
+    ".simulacra.tech",
+    # '0.0.0.0',
+    # '192.168.1.2',
+]
 
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
@@ -105,13 +104,15 @@ DATABASES['default'].update(db_from_env)
 
 # Channels
 
+# Define Channel Layer. The first option is appropriate for
+# development and the second for production (and development)
+
 # CHANNEL_LAYERS = {
 #     "default": {
 #         "BACKEND": "asgiref.inmemory.ChannelLayer",
 #         "ROUTING": "simulacra.routing.channel_routing",
 #     },
 # }
-
 
 CHANNEL_LAYERS = {
     "default": {
@@ -162,6 +163,7 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
+# https://blog.heroku.com/in_deep_with_django_channels_the_future_of_real_time_apps_in_django
 
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
@@ -179,4 +181,5 @@ STATICFILES_DIRS = (
 # https://warehouse.python.org/project/whitenoise/
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 
-#INTERNAL_IPS = [ '127.0.0.1' ]
+# For the Django Debug Toolbar
+# INTERNAL_IPS = [ '127.0.0.1' ]
