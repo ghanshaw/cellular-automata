@@ -51,6 +51,8 @@ $(document).ready(function() {
     // Start simulation
     simulation.initSimulation();
 
+    $('#simulation-info').tooltip()
+
     // Enable drag/drop, various clicking features
     // Attach events to simulation buttons
      applyDraggabilly(simulation);

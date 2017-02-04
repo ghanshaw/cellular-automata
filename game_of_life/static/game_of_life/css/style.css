@@ -478,7 +478,29 @@ Console Dashboard
     //align-items: center;
 }
 
-#section-simulation .row-console {
+#section-simulation #simulation-info {
+    font-weight: 100;
+    font-size: 16px;
+    top: -3px;
+    left: 3px;
+    color: #2b2b2b;
+}
+
+#section-simulation .tooltip-arrow {
+    border-right-color: rgba(51, 51, 51, 0.7);
+}
+
+#section-simulation .tooltip-inner {
+    background-color: rgba(51, 51, 51, 0.7);
+}
+
+#section-simulation #simulation-info:hover {
+    color: #04ce92;
+}
+
+
+#section-simulation svg text {
+    font-family: 'Raleway', 'Roboto', sans-serif;
 }
 
 /* Extra padding on speed buttons for small screens */

@@ -45,7 +45,7 @@ def ws_receive(message):
 			# conway.activate_cells(new_cells)
 
 			# Generate predictions
-			conway.predict(30)
+			conway.predict(45)
 
 			# Create response message
 			message_json = {
@@ -138,7 +138,7 @@ def ws_receive(message):
 			conway.add_pattern(row, col, pattern)
 
 			# Generate predictions
-			conway.predict(30)
+			conway.predict(45)
 
 			# Create response message
 			message_json = {
@@ -174,7 +174,7 @@ def ws_receive(message):
 			conway.activate_cells(new_cells)
 
 			# Generate predictions
-			conway.predict(30)
+			conway.predict(45)
 
 			# Create response message
 			message_json = {
@@ -211,7 +211,7 @@ def ws_receive(message):
 			conway.randomize(gridRows, gridCols)
 
 			# Generate predictions
-			conway.predict(30)
+			conway.predict(45)
 
 			# Create response message
 			message_json = {

@@ -90,7 +90,7 @@ var Simulation = function() {
     obj.processNextPrediction = processNextPrediction;
 
 
-    obj.predictionRefresh = 15;
+    obj.predictionRefresh = 30;
 
     obj.simSpeeds = {
         'slow': 200,

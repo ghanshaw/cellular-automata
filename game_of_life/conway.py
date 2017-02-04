@@ -27,8 +27,8 @@ class Conway():
 		}
 
 		self.gen_timeline = []
-		self.max_year = 1000
-		self.max_pop = 2000
+		self.max_year = 2000
+		self.max_pop = 5000
 		self.limit = {
 			'year': -1,
 			'param': None
