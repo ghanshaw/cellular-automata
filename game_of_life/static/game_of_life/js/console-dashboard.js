@@ -288,8 +288,9 @@ var drawDashboard = function(sim) {
              .call(d3.drag()
         .on("start", function() {
             this.xPosOld = handle.attr('cx');
+            this.dragYear = drag(d3.event.x);
         })
-        .on("start drag", function() {
+        .on("drag", function() {
             this.dragYear = drag(d3.event.x);
         })
         .on("end", function() {
@@ -328,7 +329,7 @@ var drawDashboard = function(sim) {
 
         // Clamp position of pointer to edges of slider
         xPos = Math.max(xPos, 0);
-        xPos = Math.min(xPos, sliderWidth)
+        xPos = Math.min(xPos, sliderWidth);
 
         // Move handle
         handle.attr("cx", xPos);
@@ -353,7 +354,7 @@ var drawDashboard = function(sim) {
     dragEnd = function(dragYear, xPosOld) {
 
         // Unpause simulation
-        sim.isPause = false;
+        sim.isPaused = false;
 
         // Hide tooltip
         tooltip.style('display', 'none');
