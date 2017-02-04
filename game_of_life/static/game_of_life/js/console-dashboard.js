@@ -307,6 +307,11 @@ var drawDashboard = function(sim) {
         xPos = 0;
     }
 
+    // Move handle and overlay to appropriate location
+    this.consoleSlider.select('.handle').attr('cx', xPos);
+    this.consoleSlider.select('.track-overlay').attr('x2', xPos);
+
+
     /*****************************/
     // Drag start and drag end methods
     /*****************************/
