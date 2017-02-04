@@ -38,6 +38,12 @@ Section - Header
 }
 
 /* Adapt size of section tile for different screens */
+@media screen and (min-width: 781px) {
+    #section-header .page-title {
+        font-size: 63px;
+    }
+}
+
 @media screen and (min-width: 481px) and (max-width: 780px) {
     #section-header {
         height: 200px;
@@ -68,7 +74,6 @@ Section - Header
     font-weight: 900;
     bottom: -40px;
     position: absolute;
-    font-size: 63px;
 }
 
 /*
