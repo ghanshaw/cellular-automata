@@ -9,7 +9,7 @@ You can see a working demo [here][1].
 
 Many readers will be familiar with the rules of Conway's Game of Life. Please refer to [Wikipedia][2] if you want
  to learn more about this game. This simulation is built using Django Channels. This means that expensive iterations
- are done on the backend. The composition of each iteration is also stored on the backend.
+ are done on the backend. The composition of each iteration (generation) is also stored on the backend.
 
 Rather than creating and updating a grid, the game tracks only living cells and their locations,
  which allows for the grid to be essentially infinite (limited by the number of living cells that the game will allow but
@@ -18,7 +18,7 @@ Rather than creating and updating a grid, the game tracks only living cells and 
 
 Users can add living cells to the game by dragging and dropping patterns or drawing directly on the canvas.
 
-The dashboard to the right of the board keeps tracks of the number of living cells at any given time. This allows users
+The dashboard to the right of the canvas keeps tracks of the number of living cells at any given time. This allows users
  to observe how quickly and successfully certain patterns propagate. The dashboard also includes a timeline which
   allows users to observe different points in the pattern's "history" or to edit that history by revisiting a previous
    iteration and then changing the pattern.
@@ -78,7 +78,7 @@ stored in a JSON file.
 python  manage.py loaddata initial_data.json
 ```
 
-### 5. Activate redis
+### 6. Activate redis
 
 As explained in the Channels documentation, the Redis layer is the recommended backend to run Channels with. If it is
 not already present and active on your localhost, your will need to install it.
@@ -107,7 +107,7 @@ PONG
 python manage.py runserver
 ```
 
-**Note:** Many aspects of the django setup, particularly in settings.py, have been adapted to prepare the project for 
+**Note:** Many aspects of this django setup, particularly in settings.py, have been adapted to prepare the project for 
 deployment, specifically on Heroku. If you encounter difficulty running the project, refer to previous versions of the project before it was adapted for
 Heroku. Consider installing a vanilla version of Django and transferring files as necessary.
 
