@@ -9,7 +9,7 @@ You can see a working demo [here][1].
 
 Many readers will be familiar with the rules of Conway's Game of Life. Please refer to [Wikipedia][2] if you want
  to learn more about this game. This simulation is built using Django Channels. This means that expensive iterations
- are done on the backend. Also, the composition of each iteration is also stored on the backend.
+ are done on the backend. The composition of each iteration is also stored on the backend.
 
 Rather than creating and updating a grid, the game tracks only living cells and their locations,
  which allows for the grid to be essentially infinite (limited by the number of living cells that the game will allow but
@@ -107,8 +107,8 @@ PONG
 python manage.py runserver
 ```
 
-**Note:** Many of the settings have been adapted to prepare the project for deployment, specifically on Heroku.
-If you encounter difficulty running the project, refer to previous versions of the project before it was adapted for
+**Note:** Many aspects of the django setup, particularly in settings.py, have been adapted to prepare the project for 
+deployment, specifically on Heroku. If you encounter difficulty running the project, refer to previous versions of the project before it was adapted for
 Heroku. Consider installing a vanilla version of Django and transferring files as necessary.
 
 

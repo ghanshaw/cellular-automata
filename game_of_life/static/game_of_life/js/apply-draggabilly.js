@@ -1,10 +1,41 @@
+////*************************************************//
+// Class to track edges of a DOM element
 //*************************************************//
+var Edges = function(element) {
+    var $element = $(element);
+
+    var top = $element.offset().top;
+    var left = $element.offset().left;
+    var right = left + $element.width();
+    var bottom = top + $element.height();
+
+    var edges = {
+        top: top,
+        left: left,
+        right: right,
+        bottom: bottom
+    }
+
+    // inBounds method evaluates whether element a is within the bounds of element b
+    // ex: a.inBound(edgesB) returns true if a is within b
+    edges.inBounds = function(outer) {
+
+        return top > outer.top && left > outer.left && right <= (outer.right + simulation.cellWidth) && bottom <= (outer.bottom + simulation.cellHeight);
+
+    };
+
+    return edges;
+};
+
+
+////*************************************************//
 // Create all draggabilly objects
 // Draggabilly plugin provide mobile/desktop drag/drop
 // functionality and touch/click functionality
 //*************************************************//
 function applyDraggabilly (simulation) {
 
+    var $grid = $("#grid");
 
     //---------------------------------------------------//
     // Implement plugin for simulation canvas
@@ -34,9 +65,9 @@ function applyDraggabilly (simulation) {
         $draggieGrid.newCells = [];
 
 
-        gridEdges = Edges($grid);
-        gridX = pointer.pageX - gridEdges.left;
-        gridY = pointer.pageY - gridEdges.top;
+        var  gridEdges = Edges($grid);
+        var gridX = pointer.pageX - gridEdges.left;
+        var gridY = pointer.pageY - gridEdges.top;
 
 
         var rowCol = simulation.getRowCol(gridX, gridY);
@@ -60,11 +91,11 @@ function applyDraggabilly (simulation) {
 
 
     $draggieGrid.on('pointerMove', function(event, pointer) {
-
-
-        gridEdges = Edges($grid);
-        gridX = pointer.pageX - gridEdges.left;
-        gridY = pointer.pageY - gridEdges.top;
+       
+       
+        var gridEdges = Edges($grid);
+        var gridX = pointer.pageX - gridEdges.left;
+        var gridY = pointer.pageY - gridEdges.top;
 
         console.log(gridX, gridY);
 

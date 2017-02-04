@@ -1,65 +1,14 @@
-//*************************************************//
-// Class to track edges of a DOM element
-//*************************************************//
-var Edges = function(element) {
-    var $element = $(element);
-
-    var top = $element.offset().top;
-    var left = $element.offset().left;
-    var right = left + $element.width();
-    var bottom = top + $element.height();
-
-    var edges = {
-        top: top,
-        left: left,
-        right: right,
-        bottom: bottom
-    }
-
-    // inBounds method evaluates whether element a is within the bounds of element b
-    // ex: a.inBound(edgesB) returns true if a is within b
-    edges.inBounds = function(outer) {
-
-        return top > outer.top && left > outer.left && right <= (outer.right + simulation.cellWidth) && bottom <= (outer.bottom + simulation.cellHeight);
-
-    }
-
-    return edges;
-}
-
-
-
 /*************************************************/
 // Wait for DOM to load, initiate all functions
 /*************************************************/
 $(document).ready(function() {
 
-
-    //-------------------------------//
-    // Global Variables
-    //-------------------------------//
-    $grid = $('#grid');
-
-
-     // Create chart object
-     dashboard = consoleDashboard();
+     // Create dashboard object
+     var dashboard = consoleDashboard();
      dashboard.initDashboard();
 
     // Create simulation object
-    simulation = Simulation();
-
-    // Start simulation
+    var simulation = Simulation(dashboard);
     simulation.initSimulation();
 
-    $('#simulation-info').tooltip()
-
-    // Enable drag/drop, various clicking features
-    // Attach events to simulation buttons
-     applyDraggabilly(simulation);
-
-
-
-
-
-
-})
+});
