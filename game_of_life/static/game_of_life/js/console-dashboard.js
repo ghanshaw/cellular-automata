@@ -265,8 +265,12 @@ var drawDashboard = function(sim) {
     this.sliderMax
         .attr('x', sliderWidth + 15 );
 
-    // Update slider width
-    this.slider.selectAll('.track')
+    // Update width of slider container
+    this.slider.select('.track-outline')
+         .attr("x1", xSlider.range()[0])
+         .attr("x2", xSlider.range()[1]);
+ 
+     this.slider.select('.track-inset')
          .attr("x1", xSlider.range()[0])
          .attr("x2", xSlider.range()[1]);
 
@@ -285,7 +289,7 @@ var drawDashboard = function(sim) {
 
     // Implement drag functionality of timeline
     trackTarget
-             .call(d3.drag()
+        .call(d3.drag()
         .on("start", function() {
             this.xPosOld = handle.attr('cx');
             this.dragYear = drag(d3.event.x);
@@ -307,11 +311,13 @@ var drawDashboard = function(sim) {
         this.sliderMax.text(1);
         xPos = 0;
     }
-
-    // Move handle and overlay to appropriate location
-    this.consoleSlider.select('.handle').attr('cx', xPos);
-    this.consoleSlider.select('.track-overlay').attr('x2', xPos);
-
+    
+    // In simulation isn't being altered (in this case slider is being dragged)
+    if (sim.isAltering == false) {
+        // Move handle and overlay to appropriate location
+        this.consoleSlider.select('.handle').attr('cx', xPos);
+        this.consoleSlider.select('.track-overlay').attr('x2', xPos);
+    }
 
     /*****************************/
     // Drag start and drag end methods
@@ -322,6 +328,7 @@ var drawDashboard = function(sim) {
         // Pause simulation if it's running
         if (sim.isRunning) {
             sim.isPaused = true;
+            sim.isAltering = true;
         }
 
         // Define variable for year user drags to
@@ -353,8 +360,9 @@ var drawDashboard = function(sim) {
 
     dragEnd = function(dragYear, xPosOld) {
 
-        // Unpause simulation
+        // Unpause simulation, stop altering
         sim.isPaused = false;
+        sim.isAltering = false;
 
         // Hide tooltip
         tooltip.style('display', 'none');

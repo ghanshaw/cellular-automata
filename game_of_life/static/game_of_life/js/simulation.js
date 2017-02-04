@@ -928,7 +928,10 @@ var sendData = function(message_data) {
 
     // send_time = performance.now();
 
-    this.outgoingNum += 1;
-    this.socket.send(JSON.stringify(message_data));
+    // Execute send if socket is ready
+    if (this.socket.readyState == WebSocket.OPEN) {
+        this.outgoingNum += 1;
+        this.socket.send(JSON.stringify(message_data));
+    }
 
 };
